@@ -2,10 +2,20 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
+import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-change-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
+DATABASE_URL = config('DATABASE_URL', default='sqlite:///db.sqlite3')
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=not DEBUG,   # SSL uniquement en production (Render/Neon), pas en local
+    )
+}
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 
 INSTALLED_APPS = [
@@ -34,6 +44,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Doit être en premier
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <- ajouté ici
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -47,7 +58,7 @@ ROOT_URLCONF = 'mediconnect.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "frontend" / "dist"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -64,21 +75,8 @@ WSGI_APPLICATION = 'mediconnect.wsgi.application'
 ASGI_APPLICATION = 'mediconnect.asgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-    # Pour PostgreSQL (production):
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': config('DB_NAME'),
-    #     'USER': config('DB_USER'),
-    #     'PASSWORD': config('DB_PASSWORD'),
-    #     'HOST': config('DB_HOST', default='localhost'),
-    #     'PORT': config('DB_PORT', default='5432'),
-    # }
-}
+
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -97,7 +95,7 @@ USE_TZ = True
 # Static files
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
+STATICFILES_DIRS = [BASE_DIR / "frontend" / "dist"]
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
