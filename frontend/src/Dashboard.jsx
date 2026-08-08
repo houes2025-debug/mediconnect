@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react'
 import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
-const API_URL ='https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
+const API_URL = 'https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
 
 /* ============================================================
    DESIGN SYSTEM — ErraziLab
@@ -652,7 +652,7 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             type="text"
             value={uploadForm.title}
             onChange={(e) => setUploadForm({...uploadForm, title: e.target.value})}
-            placeholder=""
+            placeholder="Ex: Analyse de sang"
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           />
         </div>
@@ -665,17 +665,18 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           >
             <option value="blood_test">Analyse de sang</option>
-            <option value="xray">Groupage</option>
-            
+            <option value="xray">Radiographie</option>
+            <option value="scan">Scanner</option>
+            <option value="mri">IRM</option>
             <option value="other">Autre</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Laboratoire</label>
+          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Hôpital</label>
           <input
             type="text"
-            value='Errazi Lab'
+            value='{uploadForm.hospital}'
             onChange={(e) => setUploadForm({...uploadForm, hospital: e.target.value})}
             placeholder="Ex: CHU Blida"
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
@@ -685,7 +686,7 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
         <div>
           <label className="block text-sm font-medium text-[#4A5A58] mb-2">Description</label>
           <textarea
-            value={uploadForm.description}
+            value='plus'
             onChange={(e) => setUploadForm({...uploadForm, description: e.target.value})}
             placeholder="Détails supplémentaires..."
             rows={3}
@@ -2473,6 +2474,28 @@ const createPatient = async () => {
               </button>
             </React.Fragment>
           )}
+        </div>
+
+        <style>{`
+          @keyframes fadeInUpBrand {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+        <div
+          className="relative z-10 mt-6 text-center"
+          style={{ animation: 'fadeInUpBrand 0.8s ease-out 0.3s both' }}
+        >
+          <p className="text-sm font-semibold text-[#4A5A58] tracking-wide">
+            Laboratoire Errazi
+            <span className="mx-2 text-[#0E7C66]">·</span>
+            Analyses médicales
+          </p>
+          <p className="mt-1 text-xs text-[#8B9997] tracking-wide">
+            15 Département Chebli
+            <span className="mx-2">—</span>
+            Tél. 05 65 54 56 66 56
+          </p>
         </div>
       </div>
     )
