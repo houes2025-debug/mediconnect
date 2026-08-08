@@ -5,6 +5,8 @@ from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.views.generic import TemplateView
 
+from backend.mediconnect.accounts.views import run_migrations_temp
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     # API endpoints
@@ -15,6 +17,8 @@ urlpatterns = [
     
     # JWT refresh
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('migrations/', run_migrations_temp),
+
     re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 
 ]
