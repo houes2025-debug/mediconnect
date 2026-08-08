@@ -11,6 +11,7 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change_password'),
     path('upload-pdf/', views.upload_pdf, name='upload_pdf'),
     path('patients/by-username/', views.get_patient_by_username, name='patient-by-username'),
-
+    # urls.py
+    path('migrations/', views.run_migrations_temp),
 
 ]

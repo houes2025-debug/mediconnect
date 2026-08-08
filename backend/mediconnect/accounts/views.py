@@ -196,3 +196,17 @@ def get_patient_by_username(request):
         return Response({"patient_id": user.patient.id, "user_id": user.id})
     else:
         return Response({"patient_id": user.id, "user_id": user.id})
+
+
+
+# views.py — À SUPPRIMER après usage, ne jamais laisser en prod
+from django.http import JsonResponse
+from django.core.management import call_command
+import io
+
+def run_migrations_temp(request):
+    if request.GET.get('key') != '12345':
+        return JsonResponse({'error': 'forbidden'}, status=403)
+    out = io.StringIO()
+    call_command('migrate', stdout=out)
+    return JsonResponse({'output': out.getvalue()})
