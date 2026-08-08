@@ -652,7 +652,7 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             type="text"
             value={uploadForm.title}
             onChange={(e) => setUploadForm({...uploadForm, title: e.target.value})}
-            placeholder="Ex: Analyse de sang"
+            placeholder=""
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           />
         </div>
@@ -665,18 +665,17 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           >
             <option value="blood_test">Analyse de sang</option>
-            <option value="xray">Radiographie</option>
-            <option value="scan">Scanner</option>
-            <option value="mri">IRM</option>
+            <option value="xray">Groupage</option>
+            
             <option value="other">Autre</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Hôpital</label>
+          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Laboratoire</label>
           <input
             type="text"
-            value='{uploadForm.hospital}'
+            value='Errazi Lab'
             onChange={(e) => setUploadForm({...uploadForm, hospital: e.target.value})}
             placeholder="Ex: CHU Blida"
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
@@ -686,7 +685,7 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
         <div>
           <label className="block text-sm font-medium text-[#4A5A58] mb-2">Description</label>
           <textarea
-            value='plus'
+            value=''
             onChange={(e) => setUploadForm({...uploadForm, description: e.target.value})}
             placeholder="Détails supplémentaires..."
             rows={3}
