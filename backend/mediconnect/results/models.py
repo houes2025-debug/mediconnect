@@ -10,7 +10,7 @@ class MedicalResult(models.Model):
     
     TYPE_CHOICES = [
         ('blood_test', 'Analyse sanguine'),
-        ('xray', 'Radiographie'),
+        ('Groupage', 'Groupage'),
         ('ecg', 'ECG'),
         ('mri', 'IRM'),
         ('ultrasound', 'Échographie'),
