@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react'
+﻿import React, { useState, useEffect, useCallback } from 'react'
 import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
-const API_URL = 'http://localhost:8000/api'  // Changez le port si nécessaire (ex: 8080)
+const API_URL = 'https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
 
 /* ============================================================
    DESIGN SYSTEM — ErraziLab

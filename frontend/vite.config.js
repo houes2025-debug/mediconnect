@@ -4,6 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/static/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -19,7 +20,7 @@ export default defineConfig({
     port: 3001,
     open: true,
     allowedHosts: [
-'congratulations-surrounding-ranked-brands.trycloudflare.com ','wma-digit-seeing-scanners.trycloudflare.com'  ,    'localhost',
+'*'  ,    'localhost',
     ]
   }
 })
