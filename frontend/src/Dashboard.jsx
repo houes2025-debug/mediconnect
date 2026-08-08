@@ -2586,8 +2586,19 @@ const createPatient = async () => {
         <CreateGroupModal groupForm={groupForm} setGroupForm={setGroupForm} allUsers={allUsers} user={user} toggleUserInGroup={toggleUserInGroup} createGroup={createGroup} setShowCreateGroupModal={setShowCreateGroupModal} setShowGroupsModal={setShowGroupsModal} />
       )}
       {showChangePasswordModal && (
-        <div className="fixed inset-0 bg-[#10241F]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 bg-[#10241F]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowChangePasswordModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ModalHeader
+              icon={Lock}
+              title="Changer mon mot de passe"
+              onClose={() => setShowChangePasswordModal(false)}
+            />
             <ChangePassword onSuccess={() => setShowChangePasswordModal(false)} />
           </div>
         </div>
