@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react'
 import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
-const API_URL = 'https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
+const API_URL ='http://127.0.0.1:8001/api'  // Changez le port si nécessaire (ex: 8080)
 
 /* ============================================================
    DESIGN SYSTEM — ErraziLab
@@ -685,7 +685,7 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
         <div>
           <label className="block text-sm font-medium text-[#4A5A58] mb-2">Description</label>
           <textarea
-            value=''
+            value={uploadForm.description}
             onChange={(e) => setUploadForm({...uploadForm, description: e.target.value})}
             placeholder="Détails supplémentaires..."
             rows={3}
