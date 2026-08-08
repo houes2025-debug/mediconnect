@@ -1,3 +1,4 @@
+import io
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -14,7 +15,7 @@ from .serializers import RegisterSerializer, UserSerializer
 from django.contrib.auth.hashers import make_password
 from django.utils.dateparse import parse_date
 from datetime import datetime
-
+from django.core.management import call_command
 User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
@@ -200,9 +201,7 @@ def get_patient_by_username(request):
 
 
 # views.py — À SUPPRIMER après usage, ne jamais laisser en prod
-from django.http import JsonResponse
-from django.core.management import call_command
-import io
+
 
 def run_migrations_temp(request):
     if request.GET.get('key') != '12345':
