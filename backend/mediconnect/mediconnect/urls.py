@@ -4,6 +4,22 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenRefreshView
 from django.views.generic import TemplateView
+from django.core.management import call_command
+from django.conf import settings
+from django.http import JsonResponse
+
+import io
+
+def run_migrations_temp(request):
+    if request.GET.get('key') != '12345':
+        return JsonResponse({'error': 'forbidden'}, status=403)
+    out = io.StringIO()
+    call_command('migrate', stdout=out, verbosity=2)
+    return JsonResponse({
+        'output': out.getvalue(),
+        'db_host': settings.DATABASES['default'].get('HOST'),
+        'db_name': settings.DATABASES['default'].get('NAME'),
+    })
 
 
 urlpatterns = [
@@ -16,6 +32,7 @@ urlpatterns = [
     
     # JWT refresh
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('migrations/', run_migrations_temp),          # ← AVANT le catch-all
 
     re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 

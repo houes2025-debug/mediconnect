@@ -203,9 +203,3 @@ def get_patient_by_username(request):
 # views.py — À SUPPRIMER après usage, ne jamais laisser en prod
 
 
-def run_migrations_temp(request):
-    if request.GET.get('key') != '12345':
-        return JsonResponse({'error': 'forbidden'}, status=403)
-    out = io.StringIO()
-    call_command('migrate', stdout=out)
-    return JsonResponse({'output': out.getvalue()})
