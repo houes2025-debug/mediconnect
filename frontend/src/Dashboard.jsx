@@ -673,10 +673,10 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Hôpital</label>
+          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Labo</label>
           <input
             type="text"
-            value='{uploadForm.hospital}'
+            value={uploadForm.hospital}
             onChange={(e) => setUploadForm({...uploadForm, hospital: e.target.value})}
             placeholder="Ex: CHU Blida"
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
@@ -686,7 +686,7 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
         <div>
           <label className="block text-sm font-medium text-[#4A5A58] mb-2">Description</label>
           <textarea
-            value='plus'
+            value={uploadForm.description}
             onChange={(e) => setUploadForm({...uploadForm, description: e.target.value})}
             placeholder="Détails supplémentaires..."
             rows={3}
