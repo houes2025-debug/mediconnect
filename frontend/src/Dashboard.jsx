@@ -665,9 +665,8 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           >
             <option value="blood_test">Analyse de sang</option>
-            <option value="xray">Radiographie</option>
-            <option value="scan">Scanner</option>
-            <option value="mri">IRM</option>
+            
+            <option value="mri">Groupage</option>
             <option value="other">Autre</option>
           </select>
         </div>
