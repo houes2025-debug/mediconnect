@@ -2705,6 +2705,8 @@ const createPatient = async () => {
               onClose={() => setShowChangePasswordModal(false)}
             />
             <ChangePassword onSuccess={() => setShowChangePasswordModal(false)} />
+
+              
           </div>
         </div>
       )}
