@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react'
+﻿import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
 const API_URL = 'https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
@@ -624,6 +624,96 @@ const ChatView = ({ groups, user, selectedGroup, setSelectedGroup, loadAllUsers,
    MODALS
 --------------------------------------------------------- */
 
+function PatientCombobox({ patients, value, onChange }) {
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const wrapperRef = useRef(null)
+
+  const selectedPatient = patients.find(p => String(p.id) === String(value))
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const normalized = query.trim().toLowerCase()
+  const filtered = normalized.length === 0
+    ? []
+    : patients.filter(p => {
+        const fullName = `${p.first_name} ${p.last_name}`.toLowerCase()
+        const username = (p.username || '').toLowerCase()
+        return fullName.includes(normalized) || username.includes(normalized)
+      }).slice(0, 8) // on limite l'affichage, pas besoin de tout montrer
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      {selectedPatient && !open ? (
+        <button
+          type="button"
+          onClick={() => { setOpen(true); setQuery('') }}
+          className="w-full flex items-center justify-between px-4 py-2.5 border border-[#E3EAE8] rounded-xl text-left hover:border-[#0E7C66]/40 transition-colors"
+        >
+          <span className="text-[#10241F]">
+            {selectedPatient.first_name} {selectedPatient.last_name}
+          </span>
+          <span className="text-xs text-[#8B9997]">Changer</span>
+        </button>
+      ) : (
+        <input
+          type="text"
+          autoFocus={open}
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
+          onFocus={() => setOpen(true)}
+          placeholder="Rechercher un patient par nom..."
+          className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
+        />
+      )}
+
+      {open && (
+        <div className="absolute z-20 mt-1.5 w-full bg-white border border-[#E3EAE8] rounded-xl shadow-lg max-h-64 overflow-y-auto">
+          {normalized.length === 0 && (
+            <p className="px-4 py-3 text-sm text-[#8B9997]">
+              Tapez au moins une lettre pour rechercher.
+            </p>
+          )}
+
+          {normalized.length > 0 && filtered.length === 0 && (
+            <p className="px-4 py-3 text-sm text-[#8B9997]">
+              Aucun patient trouvé pour « {query} ».
+            </p>
+          )}
+
+          {filtered.map(patient => (
+            <button
+              key={patient.id}
+              type="button"
+              onClick={() => {
+                onChange(String(patient.id))
+                setOpen(false)
+                setQuery('')
+              }}
+              className="w-full text-left px-4 py-2.5 hover:bg-[#E4F3EF] transition-colors flex flex-col"
+            >
+              <span className="text-sm font-medium text-[#10241F]">
+                {patient.first_name} {patient.last_name}
+              </span>
+              {patient.username && (
+                <span className="text-xs text-[#8B9997]">@{patient.username}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, setShowUploadModal }) => (
   <div className="fixed inset-0 bg-[#10241F]/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -632,18 +722,11 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-[#4A5A58] mb-2">Patient</label>
-          <select
+          <PatientCombobox
+            patients={patients}
             value={uploadForm.patient_id}
-            onChange={(e) => setUploadForm({...uploadForm, patient_id: e.target.value})}
-            className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
-          >
-            <option value="">Sélectionner un patient</option>
-            {patients.map(patient => (
-              <option key={patient.id} value={patient.id}>
-                {patient.first_name} {patient.last_name}
-              </option>
-            ))}
-          </select>
+            onChange={(id) => setUploadForm({...uploadForm, patient_id: id})}
+          />
         </div>
 
         <div>
@@ -665,13 +748,15 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           >
             <option value="blood_test">Analyse de sang</option>
-            <option value="mri">Groupage</option>
+            <option value="xray">Radiographie</option>
+            <option value="scan">Scanner</option>
+            <option value="mri">IRM</option>
             <option value="other">Autre</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Labo</label>
+          <label className="block text-sm font-medium text-[#4A5A58] mb-2">Hôpital</label>
           <input
             type="text"
             value={uploadForm.hospital}
