@@ -1952,12 +1952,14 @@ const createPatient = async () => {
       const token = localStorage.getItem('access_token')
       const formData = new FormData()
       formData.append('patient', uploadForm.patient_id)
+      alert(`📤 Uploading result for patient ID: ${uploadForm.patient_id}, doctor ID: ${user.id}`)
       formData.append('doctor', user.id)
       formData.append('title', uploadForm.title)
       formData.append('type', uploadForm.type)
       formData.append('description', uploadForm.description)
       formData.append('hospital', uploadForm.hospital)
       formData.append('date_examination', new Date().toISOString().split('T')[0])
+      alert(`📤 Uploading result with title: ${uploadForm.title}, type: ${uploadForm.type}, description: ${uploadForm.description}, hospital: ${uploadForm.hospital},${uploadForm.date_examination}`)
       if (uploadForm.file) {
        formData.append('file', uploadForm.file)
       }
