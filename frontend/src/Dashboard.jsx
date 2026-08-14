@@ -2043,7 +2043,7 @@ const createPatient = async () => {
       formData.append('hospital', uploadForm.hospital)
       formData.append('date_examination', new Date().toISOString().split('T')[0])
       if (uploadForm.file) {
-        alert(uploadForm.file.name)
+        
        formData.append('file', uploadForm.file)
       }
 
@@ -2077,6 +2077,8 @@ const createPatient = async () => {
   const handleDownloadResult = async (result) => {
     try {
       const token = localStorage.getItem('access_token')
+      alert(token ? '✅ Token présent' : '❌ Pas de token')
+      alert(`📥 Téléchargement du résultat: ${result.title || 'Résultat'} (ID: ${result.id})`)
       const response = await fetch(`${API_URL}/results/${result.id}/download/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
