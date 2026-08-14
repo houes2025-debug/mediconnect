@@ -714,7 +714,7 @@ function PatientCombobox({ patients, value, onChange }) {
   )
 }
 
-const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, setShowUploadModal }) => (
+const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, setShowUploadModal, isUploading }) => (
   <div className="fixed inset-0 bg-[#10241F]/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <ModalHeader icon={Upload} title="Uploader un résultat" onClose={() => setShowUploadModal(false)} />
@@ -748,8 +748,9 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           >
             <option value="blood_test">Analyse de sang</option>
-            
-            <option value="groupage">Groupage</option>
+            <option value="xray">Radiographie</option>
+            <option value="scan">Scanner</option>
+            <option value="mri">IRM</option>
             <option value="other">Autre</option>
           </select>
         </div>
@@ -791,10 +792,10 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
 
         <button
           onClick={handleUploadResult}
-          disabled={!uploadForm.patient_id || !uploadForm.title}
+          disabled={!uploadForm.patient_id || !uploadForm.title || isUploading}
           className="w-full bg-[#0E7C66] hover:bg-[#0A5C4C] disabled:bg-[#C7D3D1] text-white rounded-xl py-3 font-semibold transition-colors"
         >
-          Uploader
+          {isUploading ? 'Envoi en cours...' : 'Uploader'}
         </button>
       </div>
     </div>
@@ -2031,7 +2032,11 @@ const createPatient = async () => {
     setPatients([])
   }
 
+  const [isUploadingResult, setIsUploadingResult] = useState(false)
+
   const handleUploadResult = async () => {
+    if (isUploadingResult) return // sécurité supplémentaire si la fonction est appelée en dehors du bouton
+    setIsUploadingResult(true)
     try {
       const token = localStorage.getItem('access_token')
       const formData = new FormData()
@@ -2043,7 +2048,6 @@ const createPatient = async () => {
       formData.append('hospital', uploadForm.hospital)
       formData.append('date_examination', new Date().toISOString().split('T')[0])
       if (uploadForm.file) {
-        
        formData.append('file', uploadForm.file)
       }
 
@@ -2071,22 +2075,19 @@ const createPatient = async () => {
     } catch (error) {
       console.error('Upload error:', error)
       alert('❌ Erreur lors de l\'upload')
+    } finally {
+      setIsUploadingResult(false)
     }
   }
 
   const handleDownloadResult = async (result) => {
     try {
       const token = localStorage.getItem('access_token')
-      alert(token ? '✅ Token présent' : '❌ Pas de token')
-      alert(`📥 Téléchargement du résultat: ${result.title || 'Résultat'} (ID: ${result.id})`)
-      alert(`📤 URL de téléchargement: ${API_URL}/results/${result.id}/download/`)
-      
       const response = await fetch(`${API_URL}/results/${result.id}/download/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       })
       
       if (response.ok) {
-        alert('✅ Téléchargement réussi')
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -2681,7 +2682,7 @@ const createPatient = async () => {
       </nav>
 
       {showUploadModal && (
-        <UploadModal uploadForm={uploadForm} setUploadForm={setUploadForm} patients={patients} handleUploadResult={handleUploadResult} setShowUploadModal={setShowUploadModal} />
+        <UploadModal uploadForm={uploadForm} setUploadForm={setUploadForm} patients={patients} handleUploadResult={handleUploadResult} setShowUploadModal={setShowUploadModal} isUploading={isUploadingResult} />
       )}
       {showAddPatientModal && (
         <AddPatientModal patientForm={patientForm} setPatientForm={setPatientForm} createPatient={createPatient} setShowAddPatientModal={setShowAddPatientModal} />
