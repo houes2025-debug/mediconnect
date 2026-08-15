@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope } from 'lucide-react'
+import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope, Calendar, Building2, Loader2 } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
 const API_URL = 'https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
 
@@ -79,45 +79,55 @@ const ModalHeader = ({ icon: Icon, iconBg = 'bg-[#E4F3EF]', iconColor = 'text-[#
 
 const PatientHomeView = ({ user, results, messages, newResultsCount, loadResults, handleLogout, formatDate, setShowChangePasswordModal }) => (
   <div className="space-y-6">
-    <div className="relative overflow-hidden rounded-3xl p-6 text-white shadow-lg shadow-[#2D6CDF]/20 bg-gradient-to-br from-[#2D6CDF] to-[#1B4FB0]">
+    <style>{`
+      @keyframes fadeInUpCard {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `}</style>
+
+    <div className="relative overflow-hidden rounded-3xl p-7 text-white shadow-xl shadow-[#2D6CDF]/15 bg-gradient-to-br from-[#1B4FB0] via-[#2D6CDF] to-[#3D7BF0]">
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className="bg-white/15 border border-white/20 rounded-2xl p-3 backdrop-blur-sm">
+          <div className="bg-white/15 border border-white/25 rounded-2xl p-3 backdrop-blur-sm">
             <User className="w-7 h-7" />
           </div>
           <div>
-            <p className="text-white/70 text-xs font-semibold tracking-wide uppercase">Espace patient</p>
-            <h2 className="text-2xl font-bold" style={displayFont}>Bonjour, {user?.first_name || user?.username}</h2>
+            <p className="text-white/65 text-[11px] font-semibold tracking-[0.15em] uppercase">Espace patient</p>
+            <h2 className="text-2xl font-bold leading-snug" style={displayFont}>
+              Bonjour, {user?.first_name || user?.username}
+            </h2>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <button onClick={() => setShowChangePasswordModal(true)} title="Changer mon mot de passe" className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
+          <button onClick={() => setShowChangePasswordModal(true)} title="Changer mon mot de passe" className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-full p-2.5 transition-colors">
             <Lock className="w-5 h-5" />
           </button>
-          <button onClick={handleLogout} className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
+          <button onClick={handleLogout} className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-full p-2.5 transition-colors">
             <LogOut className="w-5 h-5" />
           </button>
         </div>
       </div>
-      <PulseLine className="absolute bottom-0 left-0 w-full h-10 text-white" opacity={0.25} />
+      <PulseLine className="absolute bottom-0 left-0 w-full h-10 text-white" opacity={0.2} />
     </div>
 
     <div className="grid grid-cols-2 gap-4">
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
-        <div className="bg-[#E4F3EF] rounded-xl w-11 h-11 flex items-center justify-center mb-3">
+      <div className="group bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#0E7C66]/25 transition-all duration-200">
+        <div className="bg-[#E4F3EF] rounded-xl w-11 h-11 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
           <FileText className="w-5 h-5 text-[#0E7C66]" />
         </div>
         <h3 className="text-2xl font-bold text-[#10241F]" style={displayFont}>{results.length}</h3>
         <p className="text-sm text-[#5C6F6C]">Résultats</p>
         {newResultsCount > 0 && (
-          <span className="inline-block mt-2 bg-[#FDF1DD] text-[#B5720B] text-xs font-semibold px-2.5 py-1 rounded-full">
-            {newResultsCount} nouveau(x)
+          <span className="inline-flex items-center gap-1.5 mt-2 bg-[#FDF1DD] text-[#B5720B] text-xs font-semibold px-2.5 py-1 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#B5720B] animate-pulse" />
+            {newResultsCount} nouveau{newResultsCount > 1 ? 'x' : ''}
           </span>
         )}
       </div>
-      
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
-        <div className="bg-[#E8EFFD] rounded-xl w-11 h-11 flex items-center justify-center mb-3">
+
+      <div className="group bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#2D6CDF]/25 transition-all duration-200">
+        <div className="bg-[#E8EFFD] rounded-xl w-11 h-11 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
           <MessageCircle className="w-5 h-5 text-[#2D6CDF]" />
         </div>
         <h3 className="text-2xl font-bold text-[#10241F]" style={displayFont}>{messages.length}</h3>
@@ -126,35 +136,46 @@ const PatientHomeView = ({ user, results, messages, newResultsCount, loadResults
     </div>
 
     <div>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-3.5">
         <h3 className="text-lg font-bold text-[#10241F]" style={displayFont}>Résultats récents</h3>
         <button onClick={loadResults} className="text-[#2D6CDF] hover:text-[#1B4FB0] transition-colors">
           <RefreshCw className="w-5 h-5" />
         </button>
       </div>
       {results.length === 0 ? (
-        <div className="text-center py-10 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
-          <FileText className="w-10 h-10 mx-auto mb-2 text-[#C7D3D1]" />
-          Aucun résultat disponible
+        <div className="text-center py-12 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
+          <div className="w-14 h-14 rounded-2xl bg-[#F4F7F6] flex items-center justify-center mx-auto mb-3">
+            <FileText className="w-6 h-6 text-[#C7D3D1]" />
+          </div>
+          <p className="font-medium text-[#4A5A58]">Aucun résultat disponible</p>
+          <p className="text-sm text-[#8B9997] mt-0.5">Vos résultats apparaîtront ici dès qu'ils seront prêts</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {results.slice(0, 3).map(result => (
-            <div key={result.id} className="bg-white rounded-2xl p-4 shadow-sm border border-[#E3EAE8] hover:border-[#2D6CDF]/30 transition-colors">
+          {results.slice(0, 3).map((result, i) => (
+            <div
+              key={result.id}
+              style={{ animation: `fadeInUpCard 0.5s ease-out ${i * 0.07}s both` }}
+              className="bg-white rounded-2xl p-4 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#2D6CDF]/25 transition-all duration-200"
+            >
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-[#E8EFFD] rounded-xl p-2.5">
+                <div className="flex items-center space-x-3 min-w-0">
+                  <div className="bg-[#E8EFFD] rounded-xl p-2.5 shrink-0">
                     <FileText className="w-5 h-5 text-[#2D6CDF]" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-[#10241F]">{result.title}</h4>
-                    <p className="text-sm text-[#5C6F6C]">
+                  <div className="min-w-0">
+                    <h4 className="font-semibold text-[#10241F] truncate">{result.title}</h4>
+                    <p className="text-sm text-[#8B9997] flex items-center gap-1.5 mt-0.5">
+                      <Calendar className="w-3.5 h-3.5" />
                       {result.date_examination ? formatDate(result.date_examination) : 'Date inconnue'}
                     </p>
                   </div>
                 </div>
                 {result.status === 'new' && (
-                  <span className="bg-[#E0473F] text-white text-xs font-semibold px-2.5 py-1 rounded-full">Nouveau</span>
+                  <span className="inline-flex items-center gap-1.5 bg-[#FDECEA] text-[#B3261E] text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ml-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#E0473F] animate-pulse" />
+                    Nouveau
+                  </span>
                 )}
               </div>
             </div>
@@ -371,60 +392,122 @@ const AdminHomeView = ({ results, handleLogout, setShowAddPatientModal, loadAllU
 
 const ResultsView = ({ user, results, loadingData, loadResults, formatDate, handleDownloadResult }) => (
   <div className="space-y-4">
+    <style>{`
+      @keyframes fadeInUpCard {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `}</style>
+
     <div className="flex items-center justify-between">
-      <h2 className="text-2xl font-bold text-[#10241F]" style={displayFont}>
-        {user?.role === 'patient' ? 'Mes résultats' : 'Résultats des patients'}
-      </h2>
-      <button onClick={loadResults} className="text-[#2D6CDF] hover:text-[#1B4FB0] transition-colors">
-        <RefreshCw className="w-5 h-5" />
+      <div>
+        <h2 className="text-2xl font-bold text-[#10241F]" style={displayFont}>
+          {user?.role === 'patient' ? 'Mes résultats' : 'Résultats des patients'}
+        </h2>
+        {results.length > 0 && (
+          <p className="text-sm text-[#8B9997] mt-0.5">
+            {results.length} résultat{results.length > 1 ? 's' : ''} au total
+          </p>
+        )}
+      </div>
+      <button
+        onClick={loadResults}
+        title="Actualiser"
+        className="text-[#2D6CDF] hover:text-white hover:bg-[#2D6CDF] border border-[#2D6CDF]/20 rounded-full p-2.5 transition-colors"
+      >
+        <RefreshCw className="w-4.5 h-4.5" />
       </button>
     </div>
-    
+
     {loadingData ? (
-      <div className="text-center py-8 text-[#5C6F6C]">Chargement...</div>
+      <div className="flex flex-col items-center justify-center py-16 text-[#8B9997]">
+        <Loader2 className="w-6 h-6 animate-spin mb-3 text-[#2D6CDF]" />
+        <p className="text-sm">Chargement des résultats...</p>
+      </div>
     ) : results.length === 0 ? (
-      <div className="text-center py-14 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
-        <FileText className="w-14 h-14 mx-auto mb-4 text-[#C7D3D1]" />
-        <p>Aucun résultat disponible</p>
+      <div className="text-center py-16 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
+        <div className="w-16 h-16 rounded-2xl bg-[#F4F7F6] flex items-center justify-center mx-auto mb-4">
+          <FileText className="w-7 h-7 text-[#C7D3D1]" />
+        </div>
+        <p className="font-medium text-[#4A5A58]">Aucun résultat disponible</p>
+        <p className="text-sm text-[#8B9997] mt-1">
+          {user?.role === 'patient'
+            ? 'Vos comptes-rendus apparaîtront ici dès leur mise en ligne'
+            : 'Les résultats transmis apparaîtront ici'}
+        </p>
       </div>
     ) : (
-      results.map(result => (
-        <div key={result.id} className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center space-x-3">
-              <div className={`rounded-xl p-3 ${result.status === 'new' ? 'bg-[#2D6CDF]' : 'bg-[#F4F7F6]'}`}>
-                <FileText className={`w-6 h-6 ${result.status === 'new' ? 'text-white' : 'text-[#5C6F6C]'}`} />
-              </div>
-              <div>
-                <h3 className="font-bold text-[#10241F]">{result.title}</h3>
-                <p className="text-sm text-[#5C6F6C]">{result.doctor_name || 'Médecin'}</p>
-                {user?.role !== 'patient' && result.patient_name && (
-                  <p className="text-sm text-[#5C6F6C]">Patient: {result.patient_name}</p>
-                )}
-                <p className="text-xs text-[#8B9997] mt-1">
-                  {result.date_examination ? formatDate(result.date_examination) : 'Date inconnue'}
-                </p>
-                {result.hospital && (
-                  <p className="text-xs text-[#8B9997]">{result.hospital}</p>
-                )}
-              </div>
-            </div>
-            {result.status === 'new' && (
-              <span className="bg-[#E0473F] text-white text-xs px-3 py-1 rounded-full font-semibold">Nouveau</span>
-            )}
-          </div>
-          {result.description && (
-            <p className="text-sm text-[#4A5A58] mb-3 bg-[#F4F7F6] p-3 rounded-xl">{result.description}</p>
-          )}
-          <button
-            onClick={() => handleDownloadResult(result)}
-            className="w-full bg-[#2D6CDF] hover:bg-[#1B4FB0] text-white rounded-xl py-3 flex items-center justify-center space-x-2 transition-colors"
+      <div className="space-y-3.5">
+        {results.map((result, i) => (
+          <div
+            key={result.id}
+            style={{ animation: `fadeInUpCard 0.5s ease-out ${Math.min(i, 8) * 0.06}s both` }}
+            className="group relative bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#2D6CDF]/20 transition-all duration-200 overflow-hidden"
           >
-            <Download className="w-5 h-5" />
-            <span className="font-medium">Télécharger le résultat</span>
-          </button>
-        </div>
-      ))
+            {result.status === 'new' && (
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#E0473F]" />
+            )}
+
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start space-x-3.5 min-w-0">
+                <div className={`rounded-xl p-3 shrink-0 ${result.status === 'new' ? 'bg-[#2D6CDF]' : 'bg-[#F4F7F6]'}`}>
+                  <FileText className={`w-5 h-5 ${result.status === 'new' ? 'text-white' : 'text-[#5C6F6C]'}`} />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-[#10241F] leading-snug" style={displayFont}>{result.title}</h3>
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                    <p className="text-sm text-[#5C6F6C] flex items-center gap-1.5">
+                      <Stethoscope className="w-3.5 h-3.5 text-[#8B9997]" />
+                      {result.doctor_name || 'Médecin'}
+                    </p>
+                    {user?.role !== 'patient' && result.patient_name && (
+                      <p className="text-sm text-[#5C6F6C] flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5 text-[#8B9997]" />
+                        {result.patient_name}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                    <p className="text-xs text-[#8B9997] flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {result.date_examination ? formatDate(result.date_examination) : 'Date inconnue'}
+                    </p>
+                    {result.hospital && (
+                      <p className="text-xs text-[#8B9997] flex items-center gap-1.5">
+                        <Building2 className="w-3.5 h-3.5" />
+                        {result.hospital}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {result.status === 'new' && (
+                <span className="inline-flex items-center gap-1.5 bg-[#FDECEA] text-[#B3261E] text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ml-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E0473F] animate-pulse" />
+                  Nouveau
+                </span>
+              )}
+            </div>
+
+            {result.description && (
+              <p className="text-sm text-[#4A5A58] mb-4 border-l-2 border-[#E3EAE8] pl-3.5 py-0.5 leading-relaxed">
+                {result.description}
+              </p>
+            )}
+
+            <button
+              onClick={() => handleDownloadResult(result)}
+              className="w-full bg-[#F4F7F6] group-hover:bg-[#2D6CDF] text-[#2D6CDF] group-hover:text-white border border-[#E3EAE8] group-hover:border-[#2D6CDF] rounded-xl py-3 flex items-center justify-center space-x-2 transition-all duration-200"
+            >
+              <Download className="w-4.5 h-4.5" />
+              <span className="font-medium text-sm">Télécharger le résultat</span>
+            </button>
+          </div>
+        ))}
+      </div>
     )}
   </div>
 )
