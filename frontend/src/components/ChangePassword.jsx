@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Lock, Eye, EyeOff } from 'lucide-react';
-const API_URL = 'https://shakespeare-termination-disposal-anonymous.trycloudflare.com/api'  // Changez le port si nécessaire (ex: 8080)
+const API_URL = 'https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
 
 export default function ChangePassword({ onSuccess }) {
   const [form, setForm] = useState({
