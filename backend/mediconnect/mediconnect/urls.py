@@ -23,7 +23,7 @@ def run_migrations_temp(request):
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admins/', admin.site.urls),
     # API endpoints
     path('api/auth/', include('accounts.urls')),
     path('api/results/', include('results.urls')),
