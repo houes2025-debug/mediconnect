@@ -2347,7 +2347,7 @@ const createPatient = async () => {
                     placeholder="votre.email@exemple.com ou username"
                     className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66] transition-colors"
                   />
-                  <p className="text-xs text-[#8B9997] mt-1" style={{ display: none }}>
+                  <p className="text-xs text-[#8B9997] mt-1" >
                     Patients: utilisez votre nom d'utilisateur | Médecins/Admins: utilisez votre email
                   </p>
                 </div>
