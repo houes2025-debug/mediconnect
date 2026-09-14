@@ -1,7 +1,7 @@
-﻿import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope, Calendar, Building2, Loader2 } from 'lucide-react'
+﻿import React, { useState, useEffect, useCallback } from 'react'
+import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope, Search, SlidersHorizontal, HeartPulse, CalendarClock, Sparkles, Star, XCircle } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
-const API_URL = 'https://mediconnect-0gxf.onrender.com/api'  // Changez le port si nécessaire (ex: 8080)
+const API_URL = 'http://127.0.0.1:8000/api'  // Changez le port si nécessaire (ex: 8080)
 
 /* ============================================================
    DESIGN SYSTEM — ErraziLab
@@ -77,105 +77,163 @@ const ModalHeader = ({ icon: Icon, iconBg = 'bg-[#E4F3EF]', iconColor = 'text-[#
    mêmes conditions. Seul l'habillage visuel change.
 --------------------------------------------------------- */
 
-const PatientHomeView = ({ user, results, messages, newResultsCount, loadResults, handleLogout, formatDate, setShowChangePasswordModal }) => (
-  <div className="space-y-6">
-    <style>{`
-      @keyframes fadeInUpCard {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    `}</style>
+const HEALTH_TIPS = [
+  "Pensez à boire au moins 1,5 L d'eau par jour, surtout en période de forte chaleur.",
+  "Une bonne nuit de sommeil (7-8h) aide votre corps à récupérer et à mieux répondre aux traitements.",
+  "Marcher 30 minutes par jour réduit significativement les risques cardiovasculaires.",
+  "N'oubliez pas d'apporter vos anciens résultats lors de chaque nouvelle consultation.",
+  "Respectez les horaires de prise de vos médicaments pour une efficacité optimale.",
+]
 
-    <div className="relative overflow-hidden rounded-3xl p-7 text-white shadow-xl shadow-[#2D6CDF]/15 bg-gradient-to-br from-[#1B4FB0] via-[#2D6CDF] to-[#3D7BF0]">
+const PatientHomeView = ({ user, results, messages, newResultsCount, unreadCount, loadResults, handleLogout, formatDate, setView, setResultSearch }) => {
+  const consultedCount = results.filter(r => r.status !== 'new').length
+  const consultRate = results.length > 0 ? Math.round((consultedCount / results.length) * 100) : 0
+
+  const lastResult = [...results].sort((a, b) => new Date(b.date_examination || 0) - new Date(a.date_examination || 0))[0]
+  const treatingDoctor = lastResult?.doctor_name
+
+  const tipOfDay = HEALTH_TIPS[new Date().getDate() % HEALTH_TIPS.length]
+
+  return (
+  <div className="space-y-6">
+    <div className="relative overflow-hidden rounded-3xl p-6 text-white shadow-lg shadow-[#2D6CDF]/20 bg-gradient-to-br from-[#2D6CDF] to-[#1B4FB0]">
       <div className="relative z-10 flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <div className="bg-white/15 border border-white/25 rounded-2xl p-3 backdrop-blur-sm">
+          <div className="bg-white/15 border border-white/20 rounded-2xl p-3 backdrop-blur-sm">
             <User className="w-7 h-7" />
           </div>
           <div>
-            <p className="text-white/65 text-[11px] font-semibold tracking-[0.15em] uppercase">Espace patient</p>
-            <h2 className="text-2xl font-bold leading-snug" style={displayFont}>
-              Bonjour, {user?.first_name || user?.username}
-            </h2>
+            <p className="text-white/70 text-xs font-semibold tracking-wide uppercase">Espace patient</p>
+            <h2 className="text-2xl font-bold" style={displayFont}>Bonjour, {user?.first_name || user?.username}</h2>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button onClick={() => setShowChangePasswordModal(true)} title="Changer mon mot de passe" className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-full p-2.5 transition-colors">
-            <Lock className="w-5 h-5" />
-          </button>
-          <button onClick={handleLogout} className="bg-white/15 hover:bg-white/25 border border-white/25 rounded-full p-2.5 transition-colors">
-            <LogOut className="w-5 h-5" />
-          </button>
-        </div>
+        <button onClick={handleLogout} className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
-      <PulseLine className="absolute bottom-0 left-0 w-full h-10 text-white" opacity={0.2} />
+      <PulseLine className="absolute bottom-0 left-0 w-full h-10 text-white" opacity={0.25} />
     </div>
 
+    {/* Recherche rapide */}
+    <button
+      onClick={() => { setResultSearch(''); setView('results') }}
+      className="w-full flex items-center gap-3 bg-white border border-[#E3EAE8] rounded-2xl px-4 py-3.5 text-left shadow-sm hover:border-[#2D6CDF]/40 hover:shadow-md transition-all"
+    >
+      <div className="bg-[#E8EFFD] rounded-xl p-2">
+        <Search className="w-4 h-4 text-[#2D6CDF]" />
+      </div>
+      <span className="text-[#8B9997] text-sm flex-1">Rechercher un résultat, un hôpital, un médecin...</span>
+      <ChevronRight className="w-4 h-4 text-[#8B9997]" />
+    </button>
+
     <div className="grid grid-cols-2 gap-4">
-      <div className="group bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#0E7C66]/25 transition-all duration-200">
-        <div className="bg-[#E4F3EF] rounded-xl w-11 h-11 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
+        <div className="bg-[#E4F3EF] rounded-xl w-11 h-11 flex items-center justify-center mb-3">
           <FileText className="w-5 h-5 text-[#0E7C66]" />
         </div>
         <h3 className="text-2xl font-bold text-[#10241F]" style={displayFont}>{results.length}</h3>
         <p className="text-sm text-[#5C6F6C]">Résultats</p>
         {newResultsCount > 0 && (
-          <span className="inline-flex items-center gap-1.5 mt-2 bg-[#FDF1DD] text-[#B5720B] text-xs font-semibold px-2.5 py-1 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#B5720B] animate-pulse" />
-            {newResultsCount} nouveau{newResultsCount > 1 ? 'x' : ''}
+          <span className="inline-block mt-2 bg-[#FDF1DD] text-[#B5720B] text-xs font-semibold px-2.5 py-1 rounded-full">
+            {newResultsCount} nouveau(x)
           </span>
         )}
       </div>
-
-      <div className="group bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#2D6CDF]/25 transition-all duration-200">
-        <div className="bg-[#E8EFFD] rounded-xl w-11 h-11 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+      
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
+        <div className="bg-[#E8EFFD] rounded-xl w-11 h-11 flex items-center justify-center mb-3">
           <MessageCircle className="w-5 h-5 text-[#2D6CDF]" />
         </div>
         <h3 className="text-2xl font-bold text-[#10241F]" style={displayFont}>{messages.length}</h3>
         <p className="text-sm text-[#5C6F6C]">Messages</p>
+        {unreadCount > 0 && (
+          <span className="inline-block mt-2 bg-[#E8EFFD] text-[#2D6CDF] text-xs font-semibold px-2.5 py-1 rounded-full">
+            {unreadCount} alerte(s)
+          </span>
+        )}
+      </div>
+    </div>
+
+    {/* Suivi santé */}
+    <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
+      <h3 className="text-lg font-bold text-[#10241F] mb-4 flex items-center gap-2" style={displayFont}>
+        <HeartPulse className="w-5 h-5 text-[#2D6CDF]" /> Mon suivi santé
+      </h3>
+      <div className="flex items-center gap-4">
+        <div className="relative w-16 h-16 shrink-0">
+          <svg viewBox="0 0 36 36" className="w-16 h-16 -rotate-90">
+            <circle cx="18" cy="18" r="15.5" fill="none" stroke="#E3EAE8" strokeWidth="3.5" />
+            <circle
+              cx="18" cy="18" r="15.5" fill="none" stroke="#0E7C66" strokeWidth="3.5"
+              strokeDasharray={`${consultRate * 0.974} 200`}
+              strokeLinecap="round"
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[#10241F]">{consultRate}%</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-[#4A5A58]">Taux de résultats consultés</p>
+          {treatingDoctor && (
+            <p className="text-sm text-[#5C6F6C] mt-1 truncate">
+              Dernier suivi par <span className="font-semibold text-[#10241F]">{treatingDoctor}</span>
+            </p>
+          )}
+          {lastResult?.date_examination && (
+            <p className="text-xs text-[#8B9997] mt-0.5">Le {formatDate(lastResult.date_examination)}</p>
+          )}
+        </div>
+      </div>
+      <button
+        onClick={() => setView('chat')}
+        className="w-full mt-4 flex items-center justify-center gap-2 bg-[#E4F3EF] hover:bg-[#D5ECE6] text-[#0A5C4C] rounded-xl py-2.5 text-sm font-semibold transition-colors"
+      >
+        <MessageCircle className="w-4 h-4" /> Contacter mon équipe médicale
+      </button>
+    </div>
+
+    {/* Conseil santé du jour */}
+    <div className="bg-gradient-to-r from-[#E4F3EF] to-[#E8EFFD] rounded-2xl p-5 border border-[#0E7C66]/10">
+      <div className="flex items-start gap-3">
+        <div className="bg-white rounded-full p-2 shrink-0 shadow-sm">
+          <Sparkles className="w-4 h-4 text-[#0E7C66]" />
+        </div>
+        <div>
+          <h4 className="font-semibold text-[#0A5C4C] text-sm mb-1">Conseil santé du jour</h4>
+          <p className="text-sm text-[#4A5A58]">{tipOfDay}</p>
+        </div>
       </div>
     </div>
 
     <div>
-      <div className="flex items-center justify-between mb-3.5">
+      <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-bold text-[#10241F]" style={displayFont}>Résultats récents</h3>
         <button onClick={loadResults} className="text-[#2D6CDF] hover:text-[#1B4FB0] transition-colors">
           <RefreshCw className="w-5 h-5" />
         </button>
       </div>
       {results.length === 0 ? (
-        <div className="text-center py-12 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
-          <div className="w-14 h-14 rounded-2xl bg-[#F4F7F6] flex items-center justify-center mx-auto mb-3">
-            <FileText className="w-6 h-6 text-[#C7D3D1]" />
-          </div>
-          <p className="font-medium text-[#4A5A58]">Aucun résultat disponible</p>
-          <p className="text-sm text-[#8B9997] mt-0.5">Vos résultats apparaîtront ici dès qu'ils seront prêts</p>
+        <div className="text-center py-10 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
+          <FileText className="w-10 h-10 mx-auto mb-2 text-[#C7D3D1]" />
+          Aucun résultat disponible
         </div>
       ) : (
         <div className="space-y-3">
-          {results.slice(0, 3).map((result, i) => (
-            <div
-              key={result.id}
-              style={{ animation: `fadeInUpCard 0.5s ease-out ${i * 0.07}s both` }}
-              className="bg-white rounded-2xl p-4 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#2D6CDF]/25 transition-all duration-200"
-            >
+          {results.slice(0, 3).map(result => (
+            <div key={result.id} className="bg-white rounded-2xl p-4 shadow-sm border border-[#E3EAE8] hover:border-[#2D6CDF]/30 transition-colors">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3 min-w-0">
-                  <div className="bg-[#E8EFFD] rounded-xl p-2.5 shrink-0">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-[#E8EFFD] rounded-xl p-2.5">
                     <FileText className="w-5 h-5 text-[#2D6CDF]" />
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="font-semibold text-[#10241F] truncate">{result.title}</h4>
-                    <p className="text-sm text-[#8B9997] flex items-center gap-1.5 mt-0.5">
-                      <Calendar className="w-3.5 h-3.5" />
+                  <div>
+                    <h4 className="font-semibold text-[#10241F]">{result.title}</h4>
+                    <p className="text-sm text-[#5C6F6C]">
                       {result.date_examination ? formatDate(result.date_examination) : 'Date inconnue'}
                     </p>
                   </div>
                 </div>
                 {result.status === 'new' && (
-                  <span className="inline-flex items-center gap-1.5 bg-[#FDECEA] text-[#B3261E] text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ml-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#E0473F] animate-pulse" />
-                    Nouveau
-                  </span>
+                  <span className="bg-[#E0473F] text-white text-xs font-semibold px-2.5 py-1 rounded-full">Nouveau</span>
                 )}
               </div>
             </div>
@@ -184,9 +242,10 @@ const PatientHomeView = ({ user, results, messages, newResultsCount, loadResults
       )}
     </div>
   </div>
-)
+  )
+}
 
-const DoctorHomeView = ({ user, patients, results, handleLogout, setShowUploadModal, setShowAddPatientModal, formatDate, setShowChangePasswordModal }) => (
+const DoctorHomeView = ({ user, patients, results, handleLogout, setShowUploadModal, setShowAddPatientModal, formatDate }) => (
   <div className="space-y-6">
     <div className="relative overflow-hidden rounded-3xl p-6 text-white shadow-lg shadow-[#0E7C66]/20 bg-gradient-to-br from-[#0E7C66] to-[#0A5C4C]">
       <div className="relative z-10 flex items-center justify-between">
@@ -199,14 +258,9 @@ const DoctorHomeView = ({ user, patients, results, handleLogout, setShowUploadMo
             <h2 className="text-2xl font-bold" style={displayFont}>Dr. {user?.last_name || user?.username}</h2>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button onClick={() => setShowChangePasswordModal(true)} title="Changer mon mot de passe" className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
-            <Lock className="w-5 h-5" />
-          </button>
-          <button onClick={handleLogout} className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
-            <LogOut className="w-5 h-5" />
-          </button>
-        </div>
+        <button onClick={handleLogout} className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
       <PulseLine className="absolute bottom-0 left-0 w-full h-10 text-white" opacity={0.25} />
     </div>
@@ -277,7 +331,7 @@ const DoctorHomeView = ({ user, patients, results, handleLogout, setShowUploadMo
   </div>
 )
 
-const AdminHomeView = ({ results, handleLogout, setShowAddPatientModal, loadAllUsers, setShowUsersModal, loadGroups, setShowGroupsModal, setShowStatsModal, setShowConfigModal, setShowChangePasswordModal }) => (
+const AdminHomeView = ({ results, handleLogout, setShowAddPatientModal, loadAllUsers, setShowUsersModal, loadGroups, setShowGroupsModal, setShowStatsModal, setShowConfigModal }) => (
   <div className="space-y-6">
     <div className="relative overflow-hidden rounded-3xl p-6 text-white shadow-lg shadow-[#6D4AFF]/20 bg-gradient-to-br from-[#6D4AFF] to-[#4B2FCF]">
       <div className="relative z-10 flex items-center justify-between">
@@ -290,14 +344,9 @@ const AdminHomeView = ({ results, handleLogout, setShowAddPatientModal, loadAllU
             <h2 className="text-2xl font-bold" style={displayFont}>Tableau de bord</h2>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-        <button onClick={() => setShowChangePasswordModal(true)} title="Changer mon mot de passe" className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
-          <Lock className="w-5 h-5" />
-        </button>
         <button onClick={handleLogout} className="bg-white/15 hover:bg-white/25 border border-white/20 rounded-full p-2.5 transition-colors">
           <LogOut className="w-5 h-5" />
         </button>
-        </div>
       </div>
       <PulseLine className="absolute bottom-0 left-0 w-full h-10 text-white" opacity={0.25} />
     </div>
@@ -390,135 +439,203 @@ const AdminHomeView = ({ results, handleLogout, setShowAddPatientModal, loadAllU
   </div>
 )
 
-const ResultsView = ({ user, results, loadingData, loadResults, formatDate, handleDownloadResult }) => (
-  <div className="space-y-4">
-    <style>{`
-      @keyframes fadeInUpCard {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    `}</style>
+const RESULT_TYPES = {
+  blood_test: { label: 'Analyse de sang', color: '#0E7C66', bg: '#E4F3EF' },
+  xray:       { label: 'Radiographie',    color: '#2D6CDF', bg: '#E8EFFD' },
+  scan:       { label: 'Scanner',         color: '#6D4AFF', bg: '#EFEAFF' },
+  mri:        { label: 'IRM',             color: '#B5720B', bg: '#FDF1DD' },
+  other:      { label: 'Autre',           color: '#5C6F6C', bg: '#F4F7F6' },
+}
 
+const ResultsView = ({
+  user, results, loadingData, loadResults, formatDate, handleDownloadResult,
+  resultSearch, setResultSearch, resultTypeFilter, setResultTypeFilter,
+  favoriteResultIds, toggleFavorite, showFavoritesOnly, setShowFavoritesOnly,
+}) => {
+  const q = resultSearch.trim().toLowerCase()
+  const filteredResults = results.filter(r => {
+    if (showFavoritesOnly && !favoriteResultIds.has(r.id)) return false
+    if (resultTypeFilter !== 'all' && r.type !== resultTypeFilter) return false
+    if (!q) return true
+    const haystack = [r.title, r.doctor_name, r.patient_name, r.hospital, r.description, RESULT_TYPES[r.type]?.label]
+      .filter(Boolean).join(' ').toLowerCase()
+    return haystack.includes(q)
+  })
+
+  return (
+  <div className="space-y-4">
     <div className="flex items-center justify-between">
-      <div>
-        <h2 className="text-2xl font-bold text-[#10241F]" style={displayFont}>
-          {user?.role === 'patient' ? 'Mes résultats' : 'Résultats des patients'}
-        </h2>
-        {results.length > 0 && (
-          <p className="text-sm text-[#8B9997] mt-0.5">
-            {results.length} résultat{results.length > 1 ? 's' : ''} au total
-          </p>
-        )}
-      </div>
+      <h2 className="text-2xl font-bold text-[#10241F]" style={displayFont}>
+        {user?.role === 'patient' ? 'Mes résultats' : 'Résultats des patients'}
+      </h2>
+      <button onClick={loadResults} className="text-[#2D6CDF] hover:text-[#1B4FB0] transition-colors">
+        <RefreshCw className="w-5 h-5" />
+      </button>
+    </div>
+
+    {/* Recherche */}
+    <div className="relative">
+      <Search className="w-4 h-4 text-[#8B9997] absolute left-3.5 top-1/2 -translate-y-1/2" />
+      <input
+        type="text"
+        value={resultSearch}
+        onChange={(e) => setResultSearch(e.target.value)}
+        placeholder="Rechercher par titre, médecin, hôpital..."
+        className="w-full pl-10 pr-9 py-2.5 bg-white border border-[#E3EAE8] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]"
+      />
+      {resultSearch && (
+        <button onClick={() => setResultSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B9997] hover:text-[#10241F]">
+          <XCircle className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+
+    {/* Filtres */}
+    <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
       <button
-        onClick={loadResults}
-        title="Actualiser"
-        className="text-[#2D6CDF] hover:text-white hover:bg-[#2D6CDF] border border-[#2D6CDF]/20 rounded-full p-2.5 transition-colors"
+        onClick={() => setResultTypeFilter('all')}
+        className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+          resultTypeFilter === 'all' ? 'bg-[#10241F] text-white border-[#10241F]' : 'bg-white text-[#5C6F6C] border-[#E3EAE8]'
+        }`}
       >
-        <RefreshCw className="w-4.5 h-4.5" />
+        Tous
+      </button>
+      {Object.entries(RESULT_TYPES).map(([key, meta]) => (
+        <button
+          key={key}
+          onClick={() => setResultTypeFilter(key)}
+          className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+            resultTypeFilter === key ? 'text-white border-transparent' : 'bg-white border-[#E3EAE8]'
+          }`}
+          style={resultTypeFilter === key ? { backgroundColor: meta.color } : { color: meta.color }}
+        >
+          {meta.label}
+        </button>
+      ))}
+      <button
+        onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+        className={`shrink-0 flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+          showFavoritesOnly ? 'bg-[#F2A93B] text-white border-transparent' : 'bg-white text-[#B5720B] border-[#E3EAE8]'
+        }`}
+      >
+        <Star className="w-3 h-3" fill={showFavoritesOnly ? 'currentColor' : 'none'} /> Favoris
       </button>
     </div>
 
     {loadingData ? (
-      <div className="flex flex-col items-center justify-center py-16 text-[#8B9997]">
-        <Loader2 className="w-6 h-6 animate-spin mb-3 text-[#2D6CDF]" />
-        <p className="text-sm">Chargement des résultats...</p>
-      </div>
+      <div className="text-center py-8 text-[#5C6F6C]">Chargement...</div>
     ) : results.length === 0 ? (
-      <div className="text-center py-16 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
-        <div className="w-16 h-16 rounded-2xl bg-[#F4F7F6] flex items-center justify-center mx-auto mb-4">
-          <FileText className="w-7 h-7 text-[#C7D3D1]" />
-        </div>
-        <p className="font-medium text-[#4A5A58]">Aucun résultat disponible</p>
-        <p className="text-sm text-[#8B9997] mt-1">
-          {user?.role === 'patient'
-            ? 'Vos comptes-rendus apparaîtront ici dès leur mise en ligne'
-            : 'Les résultats transmis apparaîtront ici'}
-        </p>
+      <div className="text-center py-14 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
+        <FileText className="w-14 h-14 mx-auto mb-4 text-[#C7D3D1]" />
+        <p>Aucun résultat disponible</p>
+      </div>
+    ) : filteredResults.length === 0 ? (
+      <div className="text-center py-14 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
+        <Search className="w-12 h-12 mx-auto mb-3 text-[#C7D3D1]" />
+        <p>Aucun résultat ne correspond à votre recherche</p>
       </div>
     ) : (
-      <div className="space-y-3.5">
-        {results.map((result, i) => (
-          <div
-            key={result.id}
-            style={{ animation: `fadeInUpCard 0.5s ease-out ${Math.min(i, 8) * 0.06}s both` }}
-            className="group relative bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8] hover:shadow-md hover:border-[#2D6CDF]/20 transition-all duration-200 overflow-hidden"
+      <>
+        <p className="text-xs text-[#8B9997]">{filteredResults.length} résultat(s)</p>
+        {filteredResults.length > 1 && (
+          <button
+            onClick={() => filteredResults.forEach(r => handleDownloadResult(r))}
+            className="w-full flex items-center justify-center gap-2 bg-white border border-[#E3EAE8] hover:border-[#2D6CDF]/40 text-[#2D6CDF] rounded-xl py-2.5 text-sm font-semibold transition-colors"
           >
-            {result.status === 'new' && (
-              <div className="absolute top-0 left-0 w-1 h-full bg-[#E0473F]" />
-            )}
-
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-start space-x-3.5 min-w-0">
-                <div className={`rounded-xl p-3 shrink-0 ${result.status === 'new' ? 'bg-[#2D6CDF]' : 'bg-[#F4F7F6]'}`}>
-                  <FileText className={`w-5 h-5 ${result.status === 'new' ? 'text-white' : 'text-[#5C6F6C]'}`} />
+            <Download className="w-4 h-4" /> Télécharger tous ces résultats
+          </button>
+        )}
+        {filteredResults.map(result => (
+          <div key={result.id} className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className={`rounded-xl p-3 ${result.status === 'new' ? 'bg-[#2D6CDF]' : 'bg-[#F4F7F6]'}`}>
+                  <FileText className={`w-6 h-6 ${result.status === 'new' ? 'text-white' : 'text-[#5C6F6C]'}`} />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="font-bold text-[#10241F] leading-snug" style={displayFont}>{result.title}</h3>
-
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                    <p className="text-sm text-[#5C6F6C] flex items-center gap-1.5">
-                      <Stethoscope className="w-3.5 h-3.5 text-[#8B9997]" />
-                      {result.doctor_name || 'Médecin'}
-                    </p>
-                    {user?.role !== 'patient' && result.patient_name && (
-                      <p className="text-sm text-[#5C6F6C] flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-[#8B9997]" />
-                        {result.patient_name}
-                      </p>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-bold text-[#10241F]">{result.title}</h3>
+                    {RESULT_TYPES[result.type] && (
+                      <span
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{ color: RESULT_TYPES[result.type].color, backgroundColor: RESULT_TYPES[result.type].bg }}
+                      >
+                        {RESULT_TYPES[result.type].label}
+                      </span>
                     )}
                   </div>
-
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                    <p className="text-xs text-[#8B9997] flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {result.date_examination ? formatDate(result.date_examination) : 'Date inconnue'}
-                    </p>
-                    {result.hospital && (
-                      <p className="text-xs text-[#8B9997] flex items-center gap-1.5">
-                        <Building2 className="w-3.5 h-3.5" />
-                        {result.hospital}
-                      </p>
-                    )}
-                  </div>
+                  <p className="text-sm text-[#5C6F6C]">{result.doctor_name || 'Médecin'}</p>
+                  {user?.role !== 'patient' && result.patient_name && (
+                    <p className="text-sm text-[#5C6F6C]">Patient: {result.patient_name}</p>
+                  )}
+                  <p className="text-xs text-[#8B9997] mt-1">
+                    {result.date_examination ? formatDate(result.date_examination) : 'Date inconnue'}
+                  </p>
+                  {result.hospital && (
+                    <p className="text-xs text-[#8B9997]">{result.hospital}</p>
+                  )}
                 </div>
               </div>
-
-              {result.status === 'new' && (
-                <span className="inline-flex items-center gap-1.5 bg-[#FDECEA] text-[#B3261E] text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ml-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#E0473F] animate-pulse" />
-                  Nouveau
-                </span>
-              )}
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                {result.status === 'new' && (
+                  <span className="bg-[#E0473F] text-white text-xs px-3 py-1 rounded-full font-semibold">Nouveau</span>
+                )}
+                <button
+                  onClick={() => toggleFavorite(result.id)}
+                  className="text-[#F2A93B] hover:scale-110 transition-transform"
+                  title={favoriteResultIds.has(result.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                >
+                  <Star className="w-5 h-5" fill={favoriteResultIds.has(result.id) ? 'currentColor' : 'none'} />
+                </button>
+              </div>
             </div>
-
             {result.description && (
-              <p className="text-sm text-[#4A5A58] mb-4 border-l-2 border-[#E3EAE8] pl-3.5 py-0.5 leading-relaxed">
-                {result.description}
-              </p>
+              <p className="text-sm text-[#4A5A58] mb-3 bg-[#F4F7F6] p-3 rounded-xl">{result.description}</p>
             )}
-
             <button
               onClick={() => handleDownloadResult(result)}
-              className="w-full bg-[#F4F7F6] group-hover:bg-[#2D6CDF] text-[#2D6CDF] group-hover:text-white border border-[#E3EAE8] group-hover:border-[#2D6CDF] rounded-xl py-3 flex items-center justify-center space-x-2 transition-all duration-200"
+              className="w-full bg-[#2D6CDF] hover:bg-[#1B4FB0] text-white rounded-xl py-3 flex items-center justify-center space-x-2 transition-colors"
             >
-              <Download className="w-4.5 h-4.5" />
-              <span className="font-medium text-sm">Télécharger le résultat</span>
+              <Download className="w-5 h-5" />
+              <span className="font-medium">Télécharger le résultat</span>
             </button>
           </div>
         ))}
-      </div>
+      </>
     )}
   </div>
-)
+  )
+}
 
-const NotificationsView = ({ notifications, loadingData, loadNotifications, markNotificationRead, formatDate }) => (
+const NotificationsView = ({ notifications, loadingData, loadNotifications, markNotificationRead, formatDate, notifSearch, setNotifSearch }) => {
+  const nq = notifSearch.trim().toLowerCase()
+  const filteredNotifications = nq
+    ? notifications.filter(n => [n.title, n.message].filter(Boolean).join(' ').toLowerCase().includes(nq))
+    : notifications
+
+  return (
   <div className="space-y-4">
     <div className="flex items-center justify-between">
       <h2 className="text-2xl font-bold text-[#10241F]" style={displayFont}>Notifications</h2>
       <button onClick={loadNotifications} className="text-[#2D6CDF] hover:text-[#1B4FB0] transition-colors">
         <RefreshCw className="w-5 h-5" />
       </button>
+    </div>
+
+    <div className="relative">
+      <Search className="w-4 h-4 text-[#8B9997] absolute left-3.5 top-1/2 -translate-y-1/2" />
+      <input
+        type="text"
+        value={notifSearch}
+        onChange={(e) => setNotifSearch(e.target.value)}
+        placeholder="Rechercher une notification..."
+        className="w-full pl-10 pr-9 py-2.5 bg-white border border-[#E3EAE8] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]"
+      />
+      {notifSearch && (
+        <button onClick={() => setNotifSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B9997] hover:text-[#10241F]">
+          <XCircle className="w-4 h-4" />
+        </button>
+      )}
     </div>
     
     {loadingData ? (
@@ -528,8 +645,13 @@ const NotificationsView = ({ notifications, loadingData, loadNotifications, mark
         <Bell className="w-14 h-14 mx-auto mb-4 text-[#C7D3D1]" />
         <p>Aucune notification</p>
       </div>
+    ) : filteredNotifications.length === 0 ? (
+      <div className="text-center py-14 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
+        <Search className="w-12 h-12 mx-auto mb-3 text-[#C7D3D1]" />
+        <p>Aucune notification ne correspond à votre recherche</p>
+      </div>
     ) : (
-      notifications.map(notif => (
+      filteredNotifications.map(notif => (
         <div
           key={notif.id}
           onClick={() => !notif.read && markNotificationRead(notif.id)}
@@ -558,10 +680,11 @@ const NotificationsView = ({ notifications, loadingData, loadNotifications, mark
       ))
     )}
   </div>
-)
+  )
+}
 
 // ========== VUE CHAT ==========
-const ChatView = ({ groups, user, selectedGroup, setSelectedGroup, loadAllUsers, loadGroups, setShowCreateGroupModal, messages, loadMessages, newMessage, setNewMessage, sendMessage, formatTime }) => {
+const ChatView = ({ groups, user, selectedGroup, setSelectedGroup, loadAllUsers, loadGroups, setShowCreateGroupModal, messages, loadMessages, newMessage, setNewMessage, sendMessage, formatTime, groupSearch, setGroupSearch }) => {
   // Charger les groupes de l'utilisateur
   const userGroups = groups.filter(g => {
     if (user?.role === 'admin') return true
@@ -570,12 +693,35 @@ const ChatView = ({ groups, user, selectedGroup, setSelectedGroup, loadAllUsers,
     return false
   })
 
+  const gq = groupSearch.trim().toLowerCase()
+  const visibleGroups = gq
+    ? userGroups.filter(g => [g.name, g.description].filter(Boolean).join(' ').toLowerCase().includes(gq))
+    : userGroups
+
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       {!selectedGroup ? (
         // Liste des groupes disponibles
         <div className="flex-1 overflow-y-auto p-1 space-y-3">
           <h2 className="text-2xl font-bold text-[#10241F] mb-4" style={displayFont}>Mes groupes</h2>
+
+          {userGroups.length > 1 && (
+            <div className="relative">
+              <Search className="w-4 h-4 text-[#8B9997] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={groupSearch}
+                onChange={(e) => setGroupSearch(e.target.value)}
+                placeholder="Rechercher un groupe..."
+                className="w-full pl-10 pr-9 py-2.5 bg-white border border-[#E3EAE8] rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
+              />
+              {groupSearch && (
+                <button onClick={() => setGroupSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8B9997] hover:text-[#10241F]">
+                  <XCircle className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          )}
           
           {user?.role === 'admin' && (
             <button
@@ -599,8 +745,13 @@ const ChatView = ({ groups, user, selectedGroup, setSelectedGroup, loadAllUsers,
                 <p className="text-sm mt-2">Demandez à votre administrateur de vous ajouter à un groupe</p>
               )}
             </div>
+          ) : visibleGroups.length === 0 ? (
+            <div className="text-center py-14 text-[#5C6F6C] bg-white rounded-2xl border border-dashed border-[#E3EAE8]">
+              <Search className="w-12 h-12 mx-auto mb-3 text-[#C7D3D1]" />
+              <p>Aucun groupe ne correspond à votre recherche</p>
+            </div>
           ) : (
-            userGroups.map(group => (
+            visibleGroups.map(group => (
               <div
                 key={group.id}
                 onClick={() => setSelectedGroup(group)}
@@ -707,97 +858,7 @@ const ChatView = ({ groups, user, selectedGroup, setSelectedGroup, loadAllUsers,
    MODALS
 --------------------------------------------------------- */
 
-function PatientCombobox({ patients, value, onChange }) {
-  const [query, setQuery] = useState('')
-  const [open, setOpen] = useState(false)
-  const wrapperRef = useRef(null)
-
-  const selectedPatient = patients.find(p => String(p.id) === String(value))
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const normalized = query.trim().toLowerCase()
-  const filtered = normalized.length === 0
-    ? []
-    : patients.filter(p => {
-        const fullName = `${p.first_name} ${p.last_name}`.toLowerCase()
-        const username = (p.username || '').toLowerCase()
-        return fullName.includes(normalized) || username.includes(normalized)
-      }).slice(0, 8) // on limite l'affichage, pas besoin de tout montrer
-
-  return (
-    <div className="relative" ref={wrapperRef}>
-      {selectedPatient && !open ? (
-        <button
-          type="button"
-          onClick={() => { setOpen(true); setQuery('') }}
-          className="w-full flex items-center justify-between px-4 py-2.5 border border-[#E3EAE8] rounded-xl text-left hover:border-[#0E7C66]/40 transition-colors"
-        >
-          <span className="text-[#10241F]">
-            {selectedPatient.first_name} {selectedPatient.last_name}
-          </span>
-          <span className="text-xs text-[#8B9997]">Changer</span>
-        </button>
-      ) : (
-        <input
-          type="text"
-          autoFocus={open}
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
-          onFocus={() => setOpen(true)}
-          placeholder="Rechercher un patient par nom..."
-          className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
-        />
-      )}
-
-      {open && (
-        <div className="absolute z-20 mt-1.5 w-full bg-white border border-[#E3EAE8] rounded-xl shadow-lg max-h-64 overflow-y-auto">
-          {normalized.length === 0 && (
-            <p className="px-4 py-3 text-sm text-[#8B9997]">
-              Tapez au moins une lettre pour rechercher.
-            </p>
-          )}
-
-          {normalized.length > 0 && filtered.length === 0 && (
-            <p className="px-4 py-3 text-sm text-[#8B9997]">
-              Aucun patient trouvé pour « {query} ».
-            </p>
-          )}
-
-          {filtered.map(patient => (
-            <button
-              key={patient.id}
-              type="button"
-              onClick={() => {
-                onChange(String(patient.id))
-                setOpen(false)
-                setQuery('')
-              }}
-              className="w-full text-left px-4 py-2.5 hover:bg-[#E4F3EF] transition-colors flex flex-col"
-            >
-              <span className="text-sm font-medium text-[#10241F]">
-                {patient.first_name} {patient.last_name}
-              </span>
-              {patient.username && (
-                <span className="text-xs text-[#8B9997]">@{patient.username}</span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, setShowUploadModal, isUploading }) => (
+const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, setShowUploadModal }) => (
   <div className="fixed inset-0 bg-[#10241F]/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div className="bg-white rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl">
       <ModalHeader icon={Upload} title="Uploader un résultat" onClose={() => setShowUploadModal(false)} />
@@ -805,11 +866,18 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-[#4A5A58] mb-2">Patient</label>
-          <PatientCombobox
-            patients={patients}
+          <select
             value={uploadForm.patient_id}
-            onChange={(id) => setUploadForm({...uploadForm, patient_id: id})}
-          />
+            onChange={(e) => setUploadForm({...uploadForm, patient_id: e.target.value})}
+            className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
+          >
+            <option value="">Sélectionner un patient</option>
+            {patients.map(patient => (
+              <option key={patient.id} value={patient.id}>
+                {patient.first_name} {patient.last_name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -875,10 +943,10 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
 
         <button
           onClick={handleUploadResult}
-          disabled={!uploadForm.patient_id || !uploadForm.title || isUploading}
+          disabled={!uploadForm.patient_id || !uploadForm.title}
           className="w-full bg-[#0E7C66] hover:bg-[#0A5C4C] disabled:bg-[#C7D3D1] text-white rounded-xl py-3 font-semibold transition-colors"
         >
-          {isUploading ? 'Envoi en cours...' : 'Uploader'}
+          Uploader
         </button>
       </div>
     </div>
@@ -1129,25 +1197,25 @@ const AddPatientModal = ({ patientForm, setPatientForm, createPatient, setShowAd
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-[#4A5A58] mb-2">Prénom *</label>
-              <input key="patient-firstname" type="text" value={patientForm.first_name} onChange={handleFirstName} placeholder="" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
+              <input key="patient-firstname" type="text" value={patientForm.first_name} onChange={handleFirstName} placeholder="Ahmed" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
             </div>
             <div>
               <label className="block text-sm font-medium text-[#4A5A58] mb-2">Nom *</label>
-              <input key="patient-lastname" type="text" value={patientForm.last_name} onChange={handleLastName} placeholder="" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
+              <input key="patient-lastname" type="text" value={patientForm.last_name} onChange={handleLastName} placeholder="Benali" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
             </div>
           </div>
 
           {/* Username */}
           <div>
             <label className="block text-sm font-medium text-[#4A5A58] mb-2"><User className="w-4 h-4 inline mr-2" />Nom d'utilisateur *</label>
-            <input key="patient-username" type="text" value={patientForm.username} onChange={handleUsername} placeholder="" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
+            <input key="patient-username" type="text" value={patientForm.username} onChange={handleUsername} placeholder="ahmed123" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
             <p className="text-xs text-[#8B9997] mt-1">Le patient utilisera ce nom pour se connecter</p>
           </div>
 
           {/* Téléphone */}
           <div>
             <label className="block text-sm font-medium text-[#4A5A58] mb-2">Téléphone</label>
-            <input key="patient-phone" type="tel" value={patientForm.phone} onChange={handlePhone} placeholder="+213 555  456" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
+            <input key="patient-phone" type="tel" value={patientForm.phone} onChange={handlePhone} placeholder="+213 555 123 456" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
           </div>
 
           {/* Mot de passe */}
@@ -1508,6 +1576,31 @@ function App() {
     file: null
   })
 
+  // --- Recherche & fonctionnalités enrichies (espace patient) ---
+  const [resultSearch, setResultSearch] = useState('')
+  const [resultTypeFilter, setResultTypeFilter] = useState('all')
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [favoriteResultIds, setFavoriteResultIds] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('favorite_results') || '[]')
+      return new Set(stored)
+    } catch {
+      return new Set()
+    }
+  })
+  const [notifSearch, setNotifSearch] = useState('')
+  const [groupSearch, setGroupSearch] = useState('')
+
+  const toggleFavorite = (resultId) => {
+    setFavoriteResultIds(prev => {
+      const next = new Set(prev)
+      if (next.has(resultId)) next.delete(resultId)
+      else next.add(resultId)
+      localStorage.setItem('favorite_results', JSON.stringify([...next]))
+      return next
+    })
+  }
+
   useEffect(() => {
     checkAuth()
   }, [])
@@ -1682,14 +1775,14 @@ function App() {
       // Si aucun endpoint ne fonctionne, utiliser des données de test
       console.log('⚠️ Aucun endpoint patients disponible, utilisation de données de test')
       setPatients([
-        { id: 1, first_name: '', last_name: '', email: '@example.com' },
+        { id: 1, first_name: 'Ahmed', last_name: 'Benali', email: 'ahmed@example.com' },
         { id: 2, first_name: 'Fatima', last_name: 'Khelif', email: 'fatima@example.com' },
         { id: 3, first_name: 'Karim', last_name: 'Zidane', email: 'karim@example.com' }
       ])
     } catch (error) {
       console.error('Error loading patients:', error)
       setPatients([
-        { id: 1, first_name: '', last_name: '', email: '@example.com' },
+        { id: 1, first_name: 'Ahmed', last_name: 'Benali', email: 'ahmed@example.com' },
         { id: 2, first_name: 'Fatima', last_name: 'Khelif', email: 'fatima@example.com' },
         { id: 3, first_name: 'Karim', last_name: 'Zidane', email: 'karim@example.com' }
       ])
@@ -1708,7 +1801,7 @@ function App() {
       } else {
         // Données de test
         setAllUsers([
-          { id: 1, username: '@example.com', first_name: '', last_name: '', role: 'patient', email: '@example.com', is_active: true },
+          { id: 1, username: 'ahmed@example.com', first_name: 'Ahmed', last_name: 'Benali', role: 'patient', email: 'ahmed@example.com', is_active: true },
           { id: 2, username: 'fatima@example.com', first_name: 'Fatima', last_name: 'Khelif', role: 'patient', email: 'fatima@example.com', is_active: true },
           { id: 3, username: 'doctor@example.com', first_name: 'Dr. Karim', last_name: 'Mansouri', role: 'doctor', email: 'doctor@example.com', is_active: true },
           { id: 4, username: 'admin@example.com', first_name: 'Admin', last_name: 'System', role: 'admin', email: 'admin@example.com', is_active: true }
@@ -1717,7 +1810,7 @@ function App() {
     } catch (error) {
       console.error('Error loading users:', error)
       setAllUsers([
-        { id: 1, username: '@example.com', first_name: '', last_name: '', role: 'patient', email: '@example.com', is_active: true },
+        { id: 1, username: 'ahmed@example.com', first_name: 'Ahmed', last_name: 'Benali', role: 'patient', email: 'ahmed@example.com', is_active: true },
         { id: 2, username: 'fatima@example.com', first_name: 'Fatima', last_name: 'Khelif', role: 'patient', email: 'fatima@example.com', is_active: true },
         { id: 3, username: 'doctor@example.com', first_name: 'Dr. Karim', last_name: 'Mansouri', role: 'doctor', email: 'doctor@example.com', is_active: true }
       ])
@@ -1742,7 +1835,7 @@ function App() {
             description: 'Suivi des patients cardiaques',
             doctors: [{ id: 3, first_name: 'Dr. Karim', last_name: 'Mansouri' }],
             patients: [
-              { id: 1, first_name: '', last_name: '' },
+              { id: 1, first_name: 'Ahmed', last_name: 'Benali' },
               { id: 2, first_name: 'Fatima', last_name: 'Khelif' }
             ],
             admins: [{ id: 4, first_name: 'Admin', last_name: 'System' }],
@@ -1760,7 +1853,7 @@ function App() {
           description: 'Suivi des patients cardiaques',
           doctors: [{ id: 3, first_name: 'Dr. Karim', last_name: 'Mansouri' }],
           patients: [
-            { id: 1, first_name: '', last_name: '' },
+            { id: 1, first_name: 'Ahmed', last_name: 'Benali' },
             { id: 2, first_name: 'Fatima', last_name: 'Khelif' }
           ],
           admins: [{ id: 4, first_name: 'Admin', last_name: 'System' }],
@@ -2115,11 +2208,7 @@ const createPatient = async () => {
     setPatients([])
   }
 
-  const [isUploadingResult, setIsUploadingResult] = useState(false)
-
   const handleUploadResult = async () => {
-    if (isUploadingResult) return // sécurité supplémentaire si la fonction est appelée en dehors du bouton
-    setIsUploadingResult(true)
     try {
       const token = localStorage.getItem('access_token')
       const formData = new FormData()
@@ -2158,8 +2247,6 @@ const createPatient = async () => {
     } catch (error) {
       console.error('Upload error:', error)
       alert('❌ Erreur lors de l\'upload')
-    } finally {
-      setIsUploadingResult(false)
     }
   }
 
@@ -2347,7 +2434,7 @@ const createPatient = async () => {
                     placeholder="votre.email@exemple.com ou username"
                     className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66] transition-colors"
                   />
-                  <p className="text-xs text-[#8B9997] mt-1" >
+                  <p className="text-xs text-[#8B9997] mt-1">
                     Patients: utilisez votre nom d'utilisateur | Médecins/Admins: utilisez votre email
                   </p>
                 </div>
@@ -2382,6 +2469,20 @@ const createPatient = async () => {
                 >
                   Se connecter
                 </button>
+                <button
+        onClick={() => setShowChangePasswordModal(true)}
+        className="bg-[#2D6CDF] hover:bg-[#1B4FB0] text-white rounded-lg py-2 px-4 flex items-center space-x-2 "
+      style={{ display: 'none' }}   >
+        <Lock className="w-4 h-4" />
+        <span>Changer mon mot de passe</span>
+      </button>
+      {showChangePasswordModal && (
+        <div className="fixed inset-0 bg-[#10241F]/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4">
+            <ChangePassword onSuccess={() => setShowChangePasswordModal(false)} />
+          </div>
+        </div>
+      )}
               </div>
 
               <div className="mt-6 text-center">
@@ -2463,7 +2564,7 @@ const createPatient = async () => {
                         console.log('Prénom:', e.target.value)
                         setSignupForm(prev => ({...prev, first_name: e.target.value}))
                       }}
-                      placeholder=""
+                      placeholder="Ahmed"
                       className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
                     />
                   </div>
@@ -2478,7 +2579,7 @@ const createPatient = async () => {
                         console.log('Nom:', e.target.value)
                         setSignupForm(prev => ({...prev, last_name: e.target.value}))
                       }}
-                      placeholder=""
+                      placeholder="Benali"
                       className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
                     />
                   </div>
@@ -2498,7 +2599,7 @@ const createPatient = async () => {
                         console.log('Username patient:', e.target.value)
                         setSignupForm(prev => ({...prev, username: e.target.value}))
                       }}
-                      placeholder=""
+                      placeholder="ahmed123"
                       className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
                     />
                     <p className="text-xs text-[#8B9997] mt-1">
@@ -2536,7 +2637,7 @@ const createPatient = async () => {
                       console.log('Téléphone:', e.target.value)
                       setSignupForm(prev => ({...prev, phone: e.target.value}))
                     }}
-                    placeholder="+213 555  456"
+                    placeholder="+213 555 123 456"
                     className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
                   />
                 </div>
@@ -2647,14 +2748,6 @@ const createPatient = async () => {
             </React.Fragment>
           )}
         </div>
-
-        <style>{`
-          @keyframes fadeInUpBrand {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}</style>
-        
       </div>
     )
   }
@@ -2664,18 +2757,52 @@ const createPatient = async () => {
       <div className="max-w-2xl mx-auto p-4 pb-24">
         {view === 'home' && (
           user?.role === 'patient' ? (
-            <PatientHomeView user={user} results={results} messages={messages} newResultsCount={newResultsCount} loadResults={loadResults} handleLogout={handleLogout} formatDate={formatDate} setShowChangePasswordModal={setShowChangePasswordModal} />
+            <PatientHomeView
+              user={user}
+              results={results}
+              messages={messages}
+              newResultsCount={newResultsCount}
+              unreadCount={unreadCount}
+              loadResults={loadResults}
+              handleLogout={handleLogout}
+              formatDate={formatDate}
+              setView={setView}
+              setResultSearch={setResultSearch}
+            />
           ) : user?.role === 'doctor' ? (
-            <DoctorHomeView user={user} patients={patients} results={results} handleLogout={handleLogout} setShowUploadModal={setShowUploadModal} setShowAddPatientModal={setShowAddPatientModal} formatDate={formatDate} setShowChangePasswordModal={setShowChangePasswordModal} />
+            <DoctorHomeView user={user} patients={patients} results={results} handleLogout={handleLogout} setShowUploadModal={setShowUploadModal} setShowAddPatientModal={setShowAddPatientModal} formatDate={formatDate} />
           ) : (
-            <AdminHomeView results={results} handleLogout={handleLogout} setShowAddPatientModal={setShowAddPatientModal} loadAllUsers={loadAllUsers} setShowUsersModal={setShowUsersModal} loadGroups={loadGroups} setShowGroupsModal={setShowGroupsModal} setShowStatsModal={setShowStatsModal} setShowConfigModal={setShowConfigModal} setShowChangePasswordModal={setShowChangePasswordModal} />
+            <AdminHomeView results={results} handleLogout={handleLogout} setShowAddPatientModal={setShowAddPatientModal} loadAllUsers={loadAllUsers} setShowUsersModal={setShowUsersModal} loadGroups={loadGroups} setShowGroupsModal={setShowGroupsModal} setShowStatsModal={setShowStatsModal} setShowConfigModal={setShowConfigModal} />
           )
         )}
         {view === 'results' && (
-          <ResultsView user={user} results={results} loadingData={loadingData} loadResults={loadResults} formatDate={formatDate} handleDownloadResult={handleDownloadResult} />
+          <ResultsView
+            user={user}
+            results={results}
+            loadingData={loadingData}
+            loadResults={loadResults}
+            formatDate={formatDate}
+            handleDownloadResult={handleDownloadResult}
+            resultSearch={resultSearch}
+            setResultSearch={setResultSearch}
+            resultTypeFilter={resultTypeFilter}
+            setResultTypeFilter={setResultTypeFilter}
+            favoriteResultIds={favoriteResultIds}
+            toggleFavorite={toggleFavorite}
+            showFavoritesOnly={showFavoritesOnly}
+            setShowFavoritesOnly={setShowFavoritesOnly}
+          />
         )}
         {view === 'notifications' && (
-          <NotificationsView notifications={notifications} loadingData={loadingData} loadNotifications={loadNotifications} markNotificationRead={markNotificationRead} formatDate={formatDate} />
+          <NotificationsView
+            notifications={notifications}
+            loadingData={loadingData}
+            loadNotifications={loadNotifications}
+            markNotificationRead={markNotificationRead}
+            formatDate={formatDate}
+            notifSearch={notifSearch}
+            setNotifSearch={setNotifSearch}
+          />
         )}
         {view === 'chat' && (
           <ChatView
@@ -2692,6 +2819,8 @@ const createPatient = async () => {
             setNewMessage={setNewMessage}
             sendMessage={sendMessage}
             formatTime={formatTime}
+            groupSearch={groupSearch}
+            setGroupSearch={setGroupSearch}
           />
         )}
       </div>
@@ -2751,7 +2880,7 @@ const createPatient = async () => {
       </nav>
 
       {showUploadModal && (
-        <UploadModal uploadForm={uploadForm} setUploadForm={setUploadForm} patients={patients} handleUploadResult={handleUploadResult} setShowUploadModal={setShowUploadModal} isUploading={isUploadingResult} />
+        <UploadModal uploadForm={uploadForm} setUploadForm={setUploadForm} patients={patients} handleUploadResult={handleUploadResult} setShowUploadModal={setShowUploadModal} />
       )}
       {showAddPatientModal && (
         <AddPatientModal patientForm={patientForm} setPatientForm={setPatientForm} createPatient={createPatient} setShowAddPatientModal={setShowAddPatientModal} />
@@ -2765,24 +2894,7 @@ const createPatient = async () => {
       {showCreateGroupModal && (
         <CreateGroupModal groupForm={groupForm} setGroupForm={setGroupForm} allUsers={allUsers} user={user} toggleUserInGroup={toggleUserInGroup} createGroup={createGroup} setShowCreateGroupModal={setShowCreateGroupModal} setShowGroupsModal={setShowGroupsModal} />
       )}
-      {showChangePasswordModal && (
-        <div
-          className="fixed inset-0 bg-[#10241F]/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => setShowChangePasswordModal(false)}
-        >
-          <div
-            className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ModalHeader
-              icon={Lock}
-              title="Changer mon mot de passe"
-              onClose={() => setShowChangePasswordModal(false)}
-            />
-            <ChangePassword onSuccess={() => setShowChangePasswordModal(false)} />
-          </div>
-        </div>
-      )}
+      {showChangePasswordModal && <ChangePassword onSuccess={() => setShowChangePasswordModal(false)} />}
       {showStatsModal && (
         <StatsModal allUsers={allUsers} patients={patients} results={results} setShowStatsModal={setShowStatsModal} />
       )}
