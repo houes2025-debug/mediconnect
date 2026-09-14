@@ -1197,18 +1197,18 @@ const AddPatientModal = ({ patientForm, setPatientForm, createPatient, setShowAd
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-[#4A5A58] mb-2">Prénom *</label>
-              <input key="patient-firstname" type="text" value={patientForm.first_name} onChange={handleFirstName} placeholder="Ahmed" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
+              <input key="patient-firstname" type="text" value={patientForm.first_name} onChange={handleFirstName} placeholder=" " className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
             </div>
             <div>
               <label className="block text-sm font-medium text-[#4A5A58] mb-2">Nom *</label>
-              <input key="patient-lastname" type="text" value={patientForm.last_name} onChange={handleLastName} placeholder="Benali" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
+              <input key="patient-lastname" type="text" value={patientForm.last_name} onChange={handleLastName} placeholder="  " className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
             </div>
           </div>
 
           {/* Username */}
           <div>
             <label className="block text-sm font-medium text-[#4A5A58] mb-2"><User className="w-4 h-4 inline mr-2" />Nom d'utilisateur *</label>
-            <input key="patient-username" type="text" value={patientForm.username} onChange={handleUsername} placeholder="ahmed123" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
+            <input key="patient-username" type="text" value={patientForm.username} onChange={handleUsername} placeholder=" 123" className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2D6CDF]/30 focus:border-[#2D6CDF]" />
             <p className="text-xs text-[#8B9997] mt-1">Le patient utilisera ce nom pour se connecter</p>
           </div>
 
@@ -1775,14 +1775,14 @@ function App() {
       // Si aucun endpoint ne fonctionne, utiliser des données de test
       console.log('⚠️ Aucun endpoint patients disponible, utilisation de données de test')
       setPatients([
-        { id: 1, first_name: 'Ahmed', last_name: 'Benali', email: 'ahmed@example.com' },
+        { id: 1, first_name: ' ', last_name: '  ', email: ' @example.com' },
         { id: 2, first_name: 'Fatima', last_name: 'Khelif', email: 'fatima@example.com' },
         { id: 3, first_name: 'Karim', last_name: 'Zidane', email: 'karim@example.com' }
       ])
     } catch (error) {
       console.error('Error loading patients:', error)
       setPatients([
-        { id: 1, first_name: 'Ahmed', last_name: 'Benali', email: 'ahmed@example.com' },
+        { id: 1, first_name: ' ', last_name: '  ', email: ' @example.com' },
         { id: 2, first_name: 'Fatima', last_name: 'Khelif', email: 'fatima@example.com' },
         { id: 3, first_name: 'Karim', last_name: 'Zidane', email: 'karim@example.com' }
       ])
@@ -1801,7 +1801,7 @@ function App() {
       } else {
         // Données de test
         setAllUsers([
-          { id: 1, username: 'ahmed@example.com', first_name: 'Ahmed', last_name: 'Benali', role: 'patient', email: 'ahmed@example.com', is_active: true },
+          { id: 1, username: ' @example.com', first_name: ' ', last_name: '  ', role: 'patient', email: ' @example.com', is_active: true },
           { id: 2, username: 'fatima@example.com', first_name: 'Fatima', last_name: 'Khelif', role: 'patient', email: 'fatima@example.com', is_active: true },
           { id: 3, username: 'doctor@example.com', first_name: 'Dr. Karim', last_name: 'Mansouri', role: 'doctor', email: 'doctor@example.com', is_active: true },
           { id: 4, username: 'admin@example.com', first_name: 'Admin', last_name: 'System', role: 'admin', email: 'admin@example.com', is_active: true }
@@ -1810,7 +1810,7 @@ function App() {
     } catch (error) {
       console.error('Error loading users:', error)
       setAllUsers([
-        { id: 1, username: 'ahmed@example.com', first_name: 'Ahmed', last_name: 'Benali', role: 'patient', email: 'ahmed@example.com', is_active: true },
+        { id: 1, username: ' @example.com', first_name: ' ', last_name: '  ', role: 'patient', email: ' @example.com', is_active: true },
         { id: 2, username: 'fatima@example.com', first_name: 'Fatima', last_name: 'Khelif', role: 'patient', email: 'fatima@example.com', is_active: true },
         { id: 3, username: 'doctor@example.com', first_name: 'Dr. Karim', last_name: 'Mansouri', role: 'doctor', email: 'doctor@example.com', is_active: true }
       ])
@@ -1835,7 +1835,7 @@ function App() {
             description: 'Suivi des patients cardiaques',
             doctors: [{ id: 3, first_name: 'Dr. Karim', last_name: 'Mansouri' }],
             patients: [
-              { id: 1, first_name: 'Ahmed', last_name: 'Benali' },
+              { id: 1, first_name: ' ', last_name: '  ' },
               { id: 2, first_name: 'Fatima', last_name: 'Khelif' }
             ],
             admins: [{ id: 4, first_name: 'Admin', last_name: 'System' }],
@@ -1853,7 +1853,7 @@ function App() {
           description: 'Suivi des patients cardiaques',
           doctors: [{ id: 3, first_name: 'Dr. Karim', last_name: 'Mansouri' }],
           patients: [
-            { id: 1, first_name: 'Ahmed', last_name: 'Benali' },
+            { id: 1, first_name: ' ', last_name: '  ' },
             { id: 2, first_name: 'Fatima', last_name: 'Khelif' }
           ],
           admins: [{ id: 4, first_name: 'Admin', last_name: 'System' }],
@@ -2564,7 +2564,7 @@ const createPatient = async () => {
                         console.log('Prénom:', e.target.value)
                         setSignupForm(prev => ({...prev, first_name: e.target.value}))
                       }}
-                      placeholder="Ahmed"
+                      placeholder=" "
                       className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
                     />
                   </div>
@@ -2579,7 +2579,7 @@ const createPatient = async () => {
                         console.log('Nom:', e.target.value)
                         setSignupForm(prev => ({...prev, last_name: e.target.value}))
                       }}
-                      placeholder="Benali"
+                      placeholder="  "
                       className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
                     />
                   </div>
@@ -2599,7 +2599,7 @@ const createPatient = async () => {
                         console.log('Username patient:', e.target.value)
                         setSignupForm(prev => ({...prev, username: e.target.value}))
                       }}
-                      placeholder="ahmed123"
+                      placeholder=" 123"
                       className="w-full px-4 py-3 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
                     />
                     <p className="text-xs text-[#8B9997] mt-1">
