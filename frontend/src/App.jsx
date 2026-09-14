@@ -7,7 +7,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Dashboard />} />
         <Route path="/app" element={<Dashboard />} />
         <Route path="*" element={<Navigate to="/" replace />} />
