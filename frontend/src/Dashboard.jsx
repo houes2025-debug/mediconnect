@@ -2523,8 +2523,7 @@ const createPatient = async () => {
                   >
                     <option value="">---</option>
                     <option value="patient">Patient</option>
-                    <option value="doctor">Médecin</option>
-                    <option value="admin">Administrateur</option>
+                    
                   </select>
                 </div>
 
