@@ -15,7 +15,7 @@ import os
 
 
 class MedicalResultViewSet(viewsets.ModelViewSet):
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # ← décommenté, urgent
     
     def get_queryset(self):
         user = self.request.user
@@ -31,10 +31,7 @@ class MedicalResultViewSet(viewsets.ModelViewSet):
         return MedicalResultSerializer
     
     def perform_create(self, serializer):
-        
         result = serializer.save()
-        
-        # Créer une notification
         Notification.objects.create(
             user=result.patient,
             type='result',
@@ -46,12 +43,22 @@ class MedicalResultViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
         result = self.get_object()
+
+        if result.reste_a_payer and result.reste_a_payer > 0:
+            return Response(
+                {'error': 'Le solde restant doit être réglé avant de télécharger ce résultat.',
+                 'reste_a_payer': str(result.reste_a_payer)},
+                status=status.HTTP_402_PAYMENT_REQUIRED
+            )
+
         result.status = 'downloaded'
         result.save()
         
-        return FileResponse(result.file.open('rb'), 
-                          as_attachment=True, 
-                          filename=result.file.name)
+        return FileResponse(
+            result.file.open('rb'),
+            as_attachment=True,
+            filename=os.path.basename(result.file.name)  # bug corrigé, voir note plus bas
+        )
     
     @action(detail=True, methods=['post'])
     def mark_viewed(self, request, pk=None):
