@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-
 class MedicalResult(models.Model):
     STATUS_CHOICES = [
         ('new', 'Nouveau'),
@@ -20,20 +19,21 @@ class MedicalResult(models.Model):
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='results')
     doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='prescribed_results')
     
-    title = models.CharField(max_length=255, default="",null=True, blank=True)
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES,null=True, blank=True)
+    title = models.CharField(max_length=255, default="", null=True, blank=True)
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='new')
     
     file = models.FileField(upload_to='results/%Y/%m/')
-    #hospital = models.CharField(max_length=255, blank=True)
+
+    # Montant restant à payer avant que le patient puisse télécharger le résultat
+    reste_a_payer = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
-    # Détails en JSON pour flexibilité
     details = models.JSONField(default=dict, blank=True, null=True)
     
     date_examination = models.DateField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True, null=True,blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
     
     def __str__(self):
         return f"{self.title} - {self.patient.get_full_name()}"
