@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope, Search, SlidersHorizontal, HeartPulse, CalendarClock, Sparkles, Star, XCircle } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+const API_URL = import.meta.env.VITE_API_URL || 'https://mediconnect-0gxf.onrender.com/api'
 
 /* ============================================================
    DESIGN SYSTEM — ErraziLab
