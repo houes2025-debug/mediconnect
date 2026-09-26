@@ -15,7 +15,7 @@ import os
 
 
 class MedicalResultViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]  # ← décommenté, urgent
+    #permission_classes = [IsAuthenticated]  # ← décommenté, urgent
     
     def get_queryset(self):
         user = self.request.user
