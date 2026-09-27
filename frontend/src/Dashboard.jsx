@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope, Search, SlidersHorizontal, HeartPulse, CalendarClock, Sparkles, Star, XCircle } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
-const API_URL = import.meta.env.VITE_API_URL || 'https://mediconnect-0gxf.onrender.com/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
 
 /* ============================================================
    DESIGN SYSTEM — ErraziLab
@@ -461,6 +461,18 @@ const AdminHomeView = ({ results, handleLogout, setShowAddPatientModal, loadAllU
   </div>
 )
 
+// Statut de paiement d'un résultat.
+// Règle : "En instance" est le cas par défaut — y compris quand reste_a_payer
+// n'est pas renseigné (null/undefined). Seule une valeur explicitement égale
+// à 0 débloque le téléchargement. Une valeur > 0 affiche le montant précis.
+function getPaymentStatus(result) {
+  const raw = result.reste_a_payer
+  const hasAmount = raw !== null && raw !== undefined && raw !== ''
+  const amount = hasAmount ? Number(raw) : null
+  const isPaid = hasAmount && amount === 0
+  return { hasAmount, amount, isPaid, isPending: !isPaid }
+}
+
 const RESULT_TYPES = {
   blood_test: { label: 'Analyse de sang', color: '#0E7C66', bg: '#E4F3EF' },
   xray:       { label: 'Radiographie',    color: '#2D6CDF', bg: '#E8EFFD' },
@@ -561,15 +573,14 @@ const ResultsView = ({
         <p className="text-xs text-[#8B9997]">{filteredResults.length} résultat(s)</p>
         {filteredResults.length > 1 && (
           <button
-            onClick={() => filteredResults.filter(r => Number(r.reste_a_payer ?? 0) === 0).forEach(r => handleDownloadResult(r))}
+            onClick={() => filteredResults.filter(r => getPaymentStatus(r).isPaid).forEach(r => handleDownloadResult(r))}
             className="w-full flex items-center justify-center gap-2 bg-white border border-[#E3EAE8] hover:border-[#2D6CDF]/40 text-[#2D6CDF] rounded-xl py-2.5 text-sm font-semibold transition-colors"
           >
             <Download className="w-4 h-4" /> Télécharger tous ces résultats
           </button>
         )}
         {filteredResults.map(result => {
-          const resteAPayer = Number(result.reste_a_payer ?? 0)
-          const isPending = resteAPayer > 0
+          const { hasAmount, amount, isPending } = getPaymentStatus(result)
           return (
           <div key={result.id} className="bg-white rounded-2xl p-5 shadow-sm border border-[#E3EAE8]">
             <div className="flex items-start justify-between mb-3">
@@ -633,7 +644,9 @@ const ResultsView = ({
                 className="w-full bg-[#FBF7EF] text-[#B5720B] border border-[#F3E3C4] rounded-xl py-3 flex items-center justify-center space-x-2 cursor-not-allowed"
               >
                 <Lock className="w-5 h-5" />
-                <span className="font-medium">Solde restant : {resteAPayer.toLocaleString('fr-DZ')} DA</span>
+                <span className="font-medium">
+                  {hasAmount ? `Solde restant : ${amount.toLocaleString('fr-DZ')} DA` : 'En instance'}
+                </span>
               </button>
             ) : (
               <button
@@ -2385,8 +2398,13 @@ const createPatient = async () => {
 
   const handleDownloadResult = async (result) => {
     // Sécurité côté front — le vrai contrôle doit aussi exister côté API
-    if (Number(result.reste_a_payer ?? 0) > 0) {
-      alert('Le solde restant doit être réglé avant de télécharger ce résultat.')
+    // Règle : "En instance" par défaut (montant inconnu inclus) ; seul un
+    // reste_a_payer explicitement égal à 0 autorise le téléchargement.
+    if (!getPaymentStatus(result).isPaid) {
+      const { hasAmount, amount } = getPaymentStatus(result)
+      alert(hasAmount
+        ? `Solde restant : ${amount.toLocaleString('fr-DZ')} DA. Réglez-le avant de télécharger.`
+        : 'Ce résultat est en instance — le solde doit être confirmé avant téléchargement.')
       return
     }
     try {
