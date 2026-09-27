@@ -13,10 +13,14 @@ class MedicalResult(models.Model):
         ('ecg', 'ECG'),
         ('mri', 'IRM'),
         ('ultrasound', 'Échographie'),
-        ('other', 'Autre'),
-    ]
-    
+        ('other', 'Autre'),]
+    def result_upload_path(instance, filename):
+        from django.utils import timezone
+        now = timezone.now()
+        return f'results/patient_{instance.patient_id}/{now:%Y/%m}/{filename}'
     patient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='results')
+    
+    
     doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='prescribed_results')
     
     title = models.CharField(max_length=255, default="", null=True, blank=True)
@@ -24,7 +28,7 @@ class MedicalResult(models.Model):
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='new')
     
-    file = models.FileField(upload_to='results/%Y/%m/')
+    file = models.FileField(upload_to=result_upload_path)
 
     # Montant restant à payer avant que le patient puisse télécharger le résultat
     reste_a_payer = models.DecimalField(max_digits=10, decimal_places=2, default=0)
