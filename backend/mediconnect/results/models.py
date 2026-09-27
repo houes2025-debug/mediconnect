@@ -28,7 +28,7 @@ class MedicalResult(models.Model):
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='new')
     
-    file = models.FileField(upload_to=result_upload_path)
+    file = models.FileField(upload_to=result_upload_path,blank=True, null=True)
 
     # Montant restant à payer avant que le patient puisse télécharger le résultat
     reste_a_payer = models.DecimalField(max_digits=10, decimal_places=2, default=0)
