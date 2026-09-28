@@ -8,7 +8,8 @@ class MedicalResultSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = MedicalResult
-        fields = '__all__'
+        fields = ['title', 'type', 'description', 'file',  
+                  'details', 'date_examination', 'patient', 'doctor','reste_a_payer']
         read_only_fields = ['created_at', 'updated_at']
 
 class MedicalResultCreateSerializer(serializers.ModelSerializer):
