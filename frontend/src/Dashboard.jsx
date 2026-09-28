@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { Bell, Download, MessageCircle, FileText, User, Send, Home, LogOut, Eye, EyeOff, Lock, Mail, RefreshCw, Upload, Users, BarChart3, Settings, X, ShieldCheck, Activity, ChevronRight, Stethoscope, Search, SlidersHorizontal, HeartPulse, CalendarClock, Sparkles, Star, XCircle } from 'lucide-react'
 import ChangePassword from './components/ChangePassword'
-const API_URL = import.meta.env.VITE_API_URL || 'https://mediconnect-0gxf.onrender.com/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
 
 /* ============================================================
    DESIGN SYSTEM — ErraziLab
@@ -465,12 +465,14 @@ const AdminHomeView = ({ results, handleLogout, setShowAddPatientModal, loadAllU
 // Règle : "En instance" est le cas par défaut — y compris quand reste_a_payer
 // n'est pas renseigné (null/undefined). Seule une valeur explicitement égale
 // à 0 débloque le téléchargement. Une valeur > 0 affiche le montant précis.
+// Valeur spéciale : -1 signifie « prêt à télécharger » (pas un vrai montant).
 function getPaymentStatus(result) {
   const raw = result.reste_a_payer
   const hasAmount = raw !== null && raw !== undefined && raw !== ''
   const amount = hasAmount ? Number(raw) : null
-  const isPaid = hasAmount && amount === 0
-  return { hasAmount, amount, isPaid, isPending: !isPaid }
+  const isReadyFlag = hasAmount && amount === -1
+  const isPaid = isReadyFlag || (hasAmount && amount === 0)
+  return { hasAmount, amount, isPaid, isReadyFlag, isPending: !isPaid }
 }
 
 const RESULT_TYPES = {
