@@ -14,5 +14,5 @@ class MedicalResultSerializer(serializers.ModelSerializer):
 class MedicalResultCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicalResult
-        fields = ['title', 'type', 'description', 'file',  
+        fields = ['id','title', 'type', 'description', 'file',  
                   'details', 'date_examination', 'patient', 'doctor','reste_a_payer']
