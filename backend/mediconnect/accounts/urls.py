@@ -11,7 +11,7 @@ urlpatterns = [
     path('change-password/', views.change_password, name='change_password'),
     path('upload-pdf/', views.upload_pdf, name='upload_pdf'),
     path('patients/by-username/', views.get_patient_by_username, name='patient-by-username'),
-    path('results/by-n_dossier/', views.get_result_by_n_dossier, name='result-by-n_dossier'),
+    #path('results/by-n_dossier/', views.get_result_by_n_dossier, name='result-by-n_dossier'),
 
     # urls.py
 
