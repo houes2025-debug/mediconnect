@@ -7,5 +7,5 @@ router.register('', views.MedicalResultViewSet, basename='result')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('results/by-n_dossier/', views.get_result_by_n_dossier, name='result-by-n_dossier'),
+    #path('results/by-n_dossier/', views.get_result_by_n_dossier, name='get_result_by_n_dossier'),
 ]
