@@ -120,21 +120,21 @@ class MedicalResultViewSet(viewsets.ModelViewSet):
         result.save()
         return Response(MedicalResultSerializer(result).data)
 
-    @api_view(['GET'])
-    #@permission_classes([AllowAny])  # le médecin doit être connecté pour chercher
-    def get_result_by_n_dossier(request):
-        """
-        GET /api/results/by-n_dossier/?description=xxx
-            Renvoie l'id du patient correspondant à ce username, s'il existe.
-        """
-        description = request.query_params.get('description', '').strip()
-        print(f"Recherche du patient par username : '{description}'")
-        if not description:
-            return Response({"error": "Le paramètre 'description' est requis."}, status=400)
+        @api_view(['GET'])
+        @permission_classes([AllowAny])  # le médecin doit être connecté pour chercher
+        def get_result_by_n_dossier(request):
+            """
+            GET /api/results/by-n_dossier/?description=xxx
+                Renvoie l'id du patient correspondant à ce username, s'il existe.
+            """
+            description = request.query_params.get('description', '').strip()
+            print(f"Recherche du patient par username : '{description}'")
+            if not description:
+                return Response({"error": "Le paramètre 'description' est requis."}, status=400)
 
-        try:
-            result = MedicalResult.objects.get(description__iexact=description)
-        except MedicalResult.DoesNotExist:
-            return Response({"error": "Aucun résultat trouvé."}, status=404)
+            try:
+                result = MedicalResult.objects.get(description__iexact=description)
+            except MedicalResult.DoesNotExist:
+                return Response({"error": "Aucun résultat trouvé."}, status=404)
 
-        return Response({"result_id": result.id})
+            return Response({"result_id": result.id})
