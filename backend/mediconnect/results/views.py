@@ -120,9 +120,9 @@ class MedicalResultViewSet(viewsets.ModelViewSet):
         result.save()
         return Response(MedicalResultSerializer(result).data)
 
-        @api_view(['GET'])
-        @permission_classes([AllowAny])  # le médecin doit être connecté pour chercher
-        def get_result_by_n_dossier(request):
+    @api_view(['GET'])
+    @permission_classes([AllowAny])  # le médecin doit être connecté pour chercher
+    def get_result_by_n_dossier(request):
             """
             GET /api/results/by-n_dossier/?description=xxx
                 Renvoie l'id du patient correspondant à ce username, s'il existe.
