@@ -121,7 +121,6 @@ class MedicalResultViewSet(viewsets.ModelViewSet):
         return Response(MedicalResultSerializer(result).data)
 
     @api_view(['GET'])
-    @permission_classes([AllowAny])  # le médecin doit être connecté pour chercher
     def get_result_by_n_dossier(request):
             """
             GET /api/results/by-n_dossier/?description=xxx
