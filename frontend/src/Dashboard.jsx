@@ -2634,7 +2634,7 @@ const createPatient = async () => {
               </div>
 
               <div className="mt-6 text-center">
-                <p className="text-[#5C6F6C] text-sm">
+                {/*<p className="text-[#5C6F6C] text-sm">
                   Pas encore de compte ?{' '}
                   <button 
                     onClick={() => setIsSignup(true)}
@@ -2642,7 +2642,7 @@ const createPatient = async () => {
                   >
                     S'inscrire
                   </button>
-                </p>
+                </p> */}
               </div>
 
               
