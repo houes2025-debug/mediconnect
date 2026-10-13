@@ -526,7 +526,7 @@ const ResultsView = ({
       )}
     </div>
 
-    {/* Filtres */}
+    {/* 
     <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
       <button
         onClick={() => setResultTypeFilter('all')}
@@ -536,6 +536,7 @@ const ResultsView = ({
       >
         Tous
       </button>
+      
       {Object.entries(RESULT_TYPES).map(([key, meta]) => (
         <button
           key={key}
@@ -554,10 +555,10 @@ const ResultsView = ({
           showFavoritesOnly ? 'bg-[#F2A93B] text-white border-transparent' : 'bg-white text-[#B5720B] border-[#E3EAE8]'
         }`}
       >
-       {/* <Star className="w-3 h-3" fill={showFavoritesOnly ? 'currentColor' : 'none'} /> Favoris */}
+        <Star className="w-3 h-3" fill={showFavoritesOnly ? 'currentColor' : 'none'} /> Favoris 
       </button>
     </div>
-
+*/}
     {loadingData ? (
       <div className="text-center py-8 text-[#5C6F6C]">Chargement...</div>
     ) : results.length === 0 ? (
@@ -2902,7 +2903,7 @@ const createPatient = async () => {
             to { opacity: 1; transform: translateY(0); }
           }
         `}</style>
-        <div
+        {/* <div
           className="relative z-10 mt-6 text-center"
           style={{ animation: 'fadeInUpBrand 0.8s ease-out 0.3s both' }}
         >
@@ -2916,7 +2917,7 @@ const createPatient = async () => {
             <span className="mx-2">—</span>
             Tél. 05 65 54 56 66 56
           </p>
-        </div>
+        </div> */}
       </div>
     )
   }
