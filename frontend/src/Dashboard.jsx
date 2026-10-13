@@ -554,7 +554,7 @@ const ResultsView = ({
           showFavoritesOnly ? 'bg-[#F2A93B] text-white border-transparent' : 'bg-white text-[#B5720B] border-[#E3EAE8]'
         }`}
       >
-        <Star className="w-3 h-3" fill={showFavoritesOnly ? 'currentColor' : 'none'} /> Favoris
+       {/* <Star className="w-3 h-3" fill={showFavoritesOnly ? 'currentColor' : 'none'} /> Favoris */}
       </button>
     </div>
 
@@ -637,7 +637,7 @@ const ResultsView = ({
               </div>
             </div>
             {result.description && (
-              <p className="text-sm text-[#4A5A58] mb-3 bg-[#F4F7F6] p-3 rounded-xl">{result.description}</p>
+              <p className="text-sm text-[#4A5A58] mb-3 bg-[#F4F7F6] p-3 rounded-xl">N° dossier: {result.description}</p>
             )}
             {isPending ? (
               <button
@@ -664,7 +664,7 @@ const ResultsView = ({
         })}
       </>
     )}
-  </div>
+  </div> 
   )
 }
 
@@ -1040,10 +1040,7 @@ const UploadModal = ({ uploadForm, setUploadForm, patients, handleUploadResult, 
             onChange={(e) => setUploadForm({...uploadForm, type: e.target.value})}
             className="w-full px-4 py-2.5 border border-[#E3EAE8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0E7C66]/30 focus:border-[#0E7C66]"
           >
-            <option value="blood_test">Analyse de sang</option>
-            <option value="xray">Radiographie</option>
-            <option value="scan">Scanner</option>
-            <option value="mri">IRM</option>
+            
             <option value="other">Autre</option>
           </select>
         </div>
