@@ -127,12 +127,14 @@ class MedicalResultViewSet(viewsets.ModelViewSet):
                 Renvoie l'id du patient correspondant à ce username, s'il existe.
             """
             description = request.query_params.get('description', '').strip()
+            print(description)    
             print(f"Recherche du patient par username : '{description}'")
             if not description:
                 return Response({"error": "Le paramètre 'description' est requis."}, status=400)
 
             try:
-                result = MedicalResult.objects.get(description__iexact=description)
+                result = MedicalResult.objects.get(description=description)
+                print(result.id)
             except MedicalResult.DoesNotExist:
                 return Response({"error": "Aucun résultat trouvé."}, status=404)
 
